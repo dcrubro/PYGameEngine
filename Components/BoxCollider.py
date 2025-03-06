@@ -1,85 +1,89 @@
 import pygame
-
 import GameObject.Objects
 from GameObject import Objects
 from Components.Component import Component
 
 class BoxCollider(Component):
-    # NOTE: This component is designed to work best with a RigidBody component
-    # installed onto the GameObject as well. Please add a RigidBody component
-    # alongside this component for proper function.
     def __init__(self, name, collisionCallback):
         super().__init__(name)
-        self.__parent = None
-        self.__sceneColliders = dict()
-        self.__size = None
-        self.__position = None
-        self.__rotation = None
-        self.__collisionCallback = collisionCallback
+        self.parentGameObject = None
+        self.sceneColliders = dict()
+        self.size = None
+        self.position = None
+        self.rotation = None
+        self.collisionCallback = collisionCallback
+        self.previousPosition = None  # Store previous position (help with colliders)
 
-    def start(self, gameObject, gameObjects):
+    def start(self, gameObject: Objects.Rectangle, gameObjects: dict):
         # Start logic
-        self.__parentGameObject = gameObject
+        self.parentGameObject = gameObject
 
-        self.__size = gameObject.getSize()
-        self.__position = gameObject.getPosition()
-        self.__rotation = gameObject.getRotation()
+        self.size = gameObject.getSize()
+        self.position = gameObject.getPosition()
+        self.rotation = gameObject.getRotation()
+        self.previousPosition = self.position  # Initialize previous position
 
-        # Get all colliders
+        # Get all colliders in scene
         for k, v in gameObjects.items():
             for k2, v2 in v.getComponents().items():
-                if type(v2) == BoxCollider:
-                    self.__sceneColliders[k] = v2
+                if isinstance(v2, BoxCollider):
+                    self.sceneColliders[k] = v2
 
     def getSceneColliders(self):
-        return self.__sceneColliders
+        return self.sceneColliders
 
-    def setSceneColliders(self, v: dict):
-        self.__sceneColliders = v
+    def setSceneColliders(self, colliders: dict):
+        self.sceneColliders = colliders
 
     def getSize(self):
-        return self.__size
+        return self.size
 
-    def setSize(self, v: pygame.Vector2):
-        self.__size = v
+    def setSize(self, size: pygame.Vector2):
+        self.size = size
 
     def getPosition(self):
-        return self.__position
+        return self.position
 
-    def setPosition(self, v: pygame.Vector2):
-        self.__position = v
+    def setPosition(self, position: pygame.Vector2):
+        self.position = position
 
     def getRotation(self):
-        return self.__rotation
+        return self.rotation
 
-    def setRotation(self, v: pygame.Vector2):
-        self.__rotation = v
+    def setRotation(self, rotation: pygame.Vector2):
+        self.rotation = rotation
 
     def getParentGameObject(self):
-        return self.__parentGameObject
+        return self.parentGameObject
 
-    def setParentGameObject(self, v: GameObject.Objects.GameObject):
-        self.__parentGameObject = v
+    def setParentGameObject(self, parent: GameObject.Objects.GameObject):
+        self.parentGameObject = parent
 
     def update(self, gameObject: Objects.Rectangle, gameObjects: dict):
-        # Update Logic
-        self.__size = gameObject.getSize()
-        self.__position = gameObject.getPosition()
-        self.__rotation = gameObject.getRotation()
+        self.position = gameObject.getPosition()
+        self.size = gameObject.getSize()
 
-        #print(gameObject, self.__position)
-
-        # Collision Check (checking contact with another BoxCollider)
-        for k, v in self.__sceneColliders.items():
-            if (v == self):
+        for key, collider in self.sceneColliders.items():
+            if collider == self:
                 continue
 
-            otherColliderPosition = v.getPosition()
-            otherColliderSize = v.getSize()
+            otherColliderPosition = collider.getPosition()
+            otherColliderSize = collider.getSize()
 
-            if ((self.__position.x >= otherColliderPosition.x and self.__position.x <= (otherColliderPosition.x + otherColliderSize.x)) and (self.__position.y >= otherColliderPosition.y and self.__position.y <= (otherColliderPosition.y + otherColliderSize.y))):
-                # Collision detected, try calling the self's collision callback
-                self.__collisionCallback(v)
+            sideX = "NONE"
+            sideY = "NONE"
 
-    def onCollision(self):
-        pass
+            #if (gameObject.getName() == "Rect1"):
+            #    print((self.position.x, self.position.y))
+
+            if (abs(self.position.x - (otherColliderPosition.x + otherColliderSize.x)) < 1):
+                sideX = "LEFT"
+            elif (abs((self.position.x + self.size.x) - otherColliderPosition.x) < 1):
+                sideX = "RIGHT"
+
+            if (abs(self.position.y - (otherColliderPosition.y + otherColliderSize.y)) < 1):
+                sideY = "TOP"
+            elif (abs((self.position.y + self.size.y) - otherColliderPosition.y) < 1):
+                sideY = "BOTTOM"
+
+            self.collisionCallback(collider, (sideX, sideY))

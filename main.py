@@ -1,4 +1,4 @@
-# Example file showing a basic pygame "game loop"
+# PYGameEngine - Basic python game engine / physics engine based on pygame.
 import pygame
 from pygame._sdl2.video import Renderer, Window
 
@@ -8,7 +8,7 @@ from Components.RigidBody import RigidBody
 from GameObjectHandler import GameObjectHandler
 from Input.Input import Input
 
-print("PYGameEngine - Version a0.2\n")
+print("PYGameEngine - Version a0.3\n")
 
 FPS = 60
 
@@ -27,21 +27,20 @@ events = pygame.event.get()
 # Some sample callbacks
 global object1CanMove
 global object2CanMove
-object1CanMove = True
-object2CanMove = True
-def object1CollisionCallback(collidedWith):
-    #collidedWith.getParentGameObject().getComponent("RigidBody").setForce(pygame.Vector2(0, 0))
+object1CanMove = ""
+object2CanMove = ""
+def object1CollisionCallback(collidedWith, side):
+    #if (side[0] != "NONE"): print(side[0])
     global object1CanMove
-    object1CanMove = False
+    object1CanMove = side
 
-def object2CollisionCallback(collidedWith):
-    #collidedWith.getParentGameObject().getComponent("RigidBody").setForce(pygame.Vector2(0, 0))
+def object2CollisionCallback(collidedWith, side):
     global object2CanMove
-    object2CanMove = False
+    object2CanMove = side
 
 gameObjectHandler = GameObjectHandler()
-"""
-object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.02, fpsConstant=FPS))
+
+object.addComponent(RigidBody("RigidBody", object, 720, 2, bounciness=0, friction=0.02, fpsConstant=FPS))
 object.addComponent(BoxCollider("BoxCollider", object1CollisionCallback))
 
 object2.addComponent(RigidBody("RigidBody2", object2, 720, 1, bounciness=0, friction=0.02, fpsConstant=FPS))
@@ -52,10 +51,11 @@ gameObjectHandler.registerGameObject(object2)
 
 #physics = Physics.Physics(720)
 #physics.registerObject(object)
-"""
 
+"""
 object: Objects.Sprite = Objects.Sprite("CoolASF", pygame.Vector2(0, 500), 0, pygame.Vector2(100, 100), "USERDIR/Textures/coolasfnobg.png")
 object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.02, fpsConstant=FPS))
+"""
 
 gameObjectHandler.registerGameObject(object)
 
@@ -83,44 +83,51 @@ while running:
     #object.getComponent("RigidBody").addForce(pygame.Vector2(0.05, 0), ForceType.INSTANT)
 
     # Basic Movement
+    frozenRight = False
+    frozenLeft = False
     if (inputHandler.isKeyPressed(pygame.K_d)):
-        forceDir: pygame.Vector2 = object.getComponent("RigidBody").getForceDirection()
-        forceDir.x = 8
-        object.getComponent("RigidBody").setForce(forceDir, isMassiveY = False)
+        if (object1CanMove[0] != "RIGHT" and not(frozenRight)):
+            forceDir: pygame.Vector2 = object.getComponent("RigidBody").getForceDirection()
+            forceDir.x = 8
+            object.getComponent("RigidBody").setForce(forceDir, isMassiveY = False)
+            frozenLeft = False
+        else:
+            object.getComponent("RigidBody").setForce(pygame.Vector2(0, 0), isMassiveY=False)
+            frozenRight = True
     if (inputHandler.isKeyPressed(pygame.K_a)):
-        forceDir: pygame.Vector2 = object.getComponent("RigidBody").getForceDirection()
-        forceDir.x = -8
-        object.getComponent("RigidBody").setForce(forceDir, isMassiveY = False)
+        if (object1CanMove[0] != "LEFT" and not(frozenLeft)):
+            forceDir: pygame.Vector2 = object.getComponent("RigidBody").getForceDirection()
+            forceDir.x = -8
+            object.getComponent("RigidBody").setForce(forceDir, isMassiveY = False)
+            frozenRight = False
+        else:
+            object.getComponent("RigidBody").setForce(pygame.Vector2(0, 0), isMassiveY=False)
+            frozenLeft = True
     if (inputHandler.isKeyPressed(pygame.K_w) and object.getComponent("RigidBody").getIsGrounded()):
         forceDir: pygame.Vector2 = object.getComponent("RigidBody").getForceDirection()
         forceDir.y = -8
         object.getComponent("RigidBody").setForce(forceDir, isMassiveY = False)
 
-    """
+
     if (inputHandler.isKeyPressed(pygame.K_l)):
-        forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
-        forceDir.x = 8
-        object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
+        if (object2CanMove[0] != "RIGHT"):
+            forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
+            forceDir.x = 8
+            object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
     if (inputHandler.isKeyPressed(pygame.K_j)):
-        forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
-        forceDir.x = -8
-        object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
+        if (object2CanMove[0] != "LEFT"):
+            forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
+            forceDir.x = -8
+            object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
     if (inputHandler.isKeyPressed(pygame.K_i) and object2.getComponent("RigidBody2").getIsGrounded()):
         forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
         forceDir.y = -8
         object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
 
-
-    if (not object1CanMove):
-        object.getComponent("RigidBody").setForce(object.getComponent("RigidBody").getForceDirection() * -1)
-    if (not object2CanMove):
-        object2.getComponent("RigidBody2").setForce(object.getComponent("RigidBody2").getForceDirection() * -1)
     #object.setRotation(object.getRotation() + 1)
     #print(object.getPosition(), object.getRotation())
 
     #print(object.getComponent("RigidBody").getForceDirection())
-    
-    """
 
     gameObjectHandler.updateThenDraw(pygame, screen)
 

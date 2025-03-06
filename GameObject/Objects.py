@@ -75,6 +75,7 @@ class Rectangle(GameObject):
     def __init__(self, name, position, rotation, size, color):
         super().__init__(name, position, rotation, (size.y / 2))
         self.__size = size
+        self.__rect = None
         self.color = color
 
     def changeColor(self, color):
@@ -85,6 +86,9 @@ class Rectangle(GameObject):
 
     def getSize(self):
         return self.__size
+
+    def getRect(self):
+        return self.__rect
 
     def draw(self, pygameInstance, screenInstance, rotation):
         self.__surface = pygame.Surface(self.__size)

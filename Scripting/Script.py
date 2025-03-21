@@ -10,6 +10,7 @@ class Script:
     def getName(self):
         return self.__name
 
+    @property
     def gameObject(self):
         return self.__gameObject
 

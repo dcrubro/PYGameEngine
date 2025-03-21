@@ -61,7 +61,6 @@ class GameObject:
     def start(self, gameObjects):
         # Runs on the first frame
         for k, v in self.__components.items():
-            #print(str(v.__class__.__bases__[0]) == "<class 'Scripting.Script.Script'>")
             if isinstance(v, Script):
                 try:
                     v.start()

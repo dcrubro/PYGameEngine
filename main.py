@@ -61,12 +61,7 @@ object.addComponent(RigidBody("RigidBody", object, 720, 1.2, bounciness=0, frict
 object.addComponent(BoxCollider("BoxCollider", 6, 3, pmScript.object1CollisionCallback))
 object.addComponent(pmScript)
 
-object2.addComponent(RigidBody("RigidBody2", object2, 720, 1, bounciness=0, friction=0.02, fpsConstant=FPS))
-object2.addComponent(BoxCollider("BoxCollider2", 4, 2, object2CollisionCallback))
-
 gameObjectHandler.registerGameObject(object)
-gameObjectHandler.registerGameObject(object2)
-
 #physics = Physics.Physics(720)
 #physics.registerObject(object)
 

@@ -3,8 +3,11 @@ import GameObject.Objects
 from GameObject import Objects
 from Components.Component import Component
 
+"""
+BoxCollider needs a RigidBody on the same object to work correctly.
+"""
 class BoxCollider(Component):
-    def __init__(self, name, collisionCallback):
+    def __init__(self, name, xTolerance, yTolerance, collisionCallback):
         super().__init__(name)
         self.parentGameObject = None
         self.sceneColliders = dict()
@@ -13,12 +16,16 @@ class BoxCollider(Component):
         self.rotation = None
         self.collisionCallback = collisionCallback
         self.previousPosition = None  # Store previous position (help with colliders)
+        self.__xTolerance = xTolerance
+        self.__yTolerance = yTolerance
+        self.velocity = None
 
     def start(self, gameObject: Objects.Rectangle, gameObjects: dict):
         # Start logic
         self.parentGameObject = gameObject
 
         self.size = gameObject.getSize()
+        self.velocity = gameObject.getComponent("RigidBody").getForceDirection()
         self.position = gameObject.getPosition()
         self.rotation = gameObject.getRotation()
         self.previousPosition = self.position  # Initialize previous position
@@ -62,6 +69,9 @@ class BoxCollider(Component):
     def update(self, gameObject: Objects.Rectangle, gameObjects: dict):
         self.position = gameObject.getPosition()
         self.size = gameObject.getSize()
+        self.velocity = gameObject.getComponent("RigidBody").getForceDirection()
+        self.mass = gameObject.getComponent("RigidBody").getMass()
+        #print(self.velocity)
 
         for key, collider in self.sceneColliders.items():
             if collider == self:
@@ -73,17 +83,16 @@ class BoxCollider(Component):
             sideX = "NONE"
             sideY = "NONE"
 
-            #if (gameObject.getName() == "Rect1"):
-            #    print((self.position.x, self.position.y))
+            if ((self.position.y < (otherColliderPosition.y + (otherColliderSize.y))) and (self.position.y > (otherColliderPosition.y - (otherColliderSize.y)))):
+                if (abs(self.position.x - (otherColliderPosition.x - otherColliderSize.x)) < self.__xTolerance - self.velocity.x * self.mass):
+                    sideX = "LEFT"
+                if (abs(self.position.x - (otherColliderPosition.x + otherColliderSize.x)) < self.__xTolerance + self.velocity.x * self.mass):
+                    sideX = "RIGHT"
 
-            if (abs(self.position.x - (otherColliderPosition.x + otherColliderSize.x)) < 1):
-                sideX = "LEFT"
-            elif (abs((self.position.x + self.size.x) - otherColliderPosition.x) < 1):
-                sideX = "RIGHT"
-
-            if (abs(self.position.y - (otherColliderPosition.y + otherColliderSize.y)) < 1):
-                sideY = "TOP"
-            elif (abs((self.position.y + self.size.y) - otherColliderPosition.y) < 1):
-                sideY = "BOTTOM"
+            if ((self.position.x < (otherColliderPosition.x + (otherColliderSize.x))) and (self.position.x > (otherColliderPosition.x - (otherColliderSize.x)))):
+                if (abs(self.position.y - (otherColliderPosition.y - otherColliderSize.y)) < self.__yTolerance - self.velocity.y * self.mass):
+                    sideY = "TOP"
+                if (abs(self.position.y - (otherColliderPosition.y + otherColliderSize.y)) < self.__yTolerance + self.velocity.y * self.mass):
+                    sideY = "BOTTOM"
 
             self.collisionCallback(collider, (sideX, sideY))

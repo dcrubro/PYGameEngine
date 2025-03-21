@@ -2,7 +2,9 @@ import pygame
 
 from Components.Component import Component
 from Enums.ForceType import ForceType
+from Enums.LogType import LogType
 from GameObject.Objects import GameObject
+from Logging.Logger import Logger
 
 class RigidBody(Component):
     def __init__(self, name, gameObject: GameObject, groundY, mass, isSimulated = True, g = 9.81, bounciness = 0, friction = 0.1, fpsConstant = 60):
@@ -86,7 +88,7 @@ class RigidBody(Component):
         if (forceType == ForceType.ACCELERATING):
             pass
         if (forceType == ForceType.NONE):
-            self.__forceDirection = pygame.Vector2()
+            self.__forceDirection = pygame.Vector2(0, 0)
             return
 
     def setForce(self, forceDirection: pygame.Vector2, isMassiveX = True, isMassiveY = True):
@@ -96,6 +98,9 @@ class RigidBody(Component):
             forceDirection = pygame.Vector2(299792458, 299792458)
             self.__forceDirection = forceDirection
             return
+
+        if (self.__mass < 0):
+            Logger.log("Set mass is negative. The physics will not work correctly!", LogType.WARNING, self.__gameObject)
 
         forceDirection = pygame.Vector2(forceDirection.x / self.__mass if isMassiveX else forceDirection.x, forceDirection.y / self.__mass if isMassiveY else forceDirection.y)
         self.__forceDirection = forceDirection

@@ -1,5 +1,6 @@
 import pygame
 import Components.Component
+from Scripting.Script import Script
 
 class GameObject:
     def __init__(self, name, position, rotation, underCenterY, components = dict()):
@@ -60,12 +61,25 @@ class GameObject:
     def start(self, gameObjects):
         # Runs on the first frame
         for k, v in self.__components.items():
-            v.start(self, gameObjects)
+            #print(str(v.__class__.__bases__[0]) == "<class 'Scripting.Script.Script'>")
+            if isinstance(v, Script):
+                try:
+                    v.start()
+                except AttributeError:
+                    continue
+            else:
+                v.start(self, gameObjects)
 
     def update(self, gameObjects):
         #Runs every frame
         for k, v in self.__components.items():
-            v.update(self, gameObjects)
+            if isinstance(v, Script):
+                try:
+                    v.update()
+                except AttributeError:
+                    continue
+            else:
+                v.update(self, gameObjects)
 
     #Override
     def draw(self, pygameInstance, screenInstance, rotation):
@@ -111,7 +125,7 @@ class Rectangle(GameObject):
 
         # Finally, blit the rotated surface to the screen at the new position
         screenInstance.blit(rotated_surface, self.__rect.topleft)
-        #pygameInstance.draw.rect(screenInstance, self.color, pygame.Rect(self.x, self.y, self.width, self.height))
+        pygameInstance.draw.rect(screenInstance, "green", pygame.Rect(self.getPosition().x, self.getPosition().y, 1, 1))
 
 class Circle(GameObject):
     def __init__(self, name, position, rotation, radius, color):

@@ -1,6 +1,7 @@
 import pygame
 
 from GameObject.Objects import GameObject
+from Scripting.Script import Script
 
 class GameObjectHandler:
     def __init__(self, gameObjects = dict()):
@@ -14,6 +15,16 @@ class GameObjectHandler:
 
     def registerGameObject(self, object: GameObject):
         self.__gameObjects[object.getName()] = object
+        # Call load on all scripts
+        for comp in object.getComponents().values():
+            try:
+                if comp.superSecretScriptIdentifierFlag:
+                    try:
+                        comp.load()
+                    except AttributeError:
+                        continue # No load() defined
+            except AttributeError:
+                continue # Not a script
 
     def start(self):
         # Start logic

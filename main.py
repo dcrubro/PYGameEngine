@@ -1,7 +1,5 @@
 # PYGameEngine - Basic python game engine / physics engine based on pygame.
-from USERDIR.Scripts.PlayerMovement import PlayerMovement
-
-VERSION = "a0.3"
+VERSION = "a0.5"
 
 print(f"\033[92mPYGameEngine - Version {VERSION} - Developed by DcruBro @ \033[33mhttps://www.dcrubro.com/\033[00m")
 print(f"\033[92mPYGameEngine\033[00m is licensed under GPLv3.")
@@ -10,14 +8,19 @@ print(f"\033[92mPYGameEngine\033[00m uses the following software: \033[92mpython
 print(f"\033[33mAnything from this point onward should be considered as logs.\033[00m")
 
 import pygame
-from pygame._sdl2.video import Renderer, Window
 import cmath
 from GameObject import Objects
+from Renderer.ImageLoader import ImageLoader
 from Components.BoxCollider import BoxCollider
 from Components.RigidBody import RigidBody
 from GameObjectHandler import GameObjectHandler
 from Input.Input import Input
+from GUI.GUI import GUI
+from imgui.integrations.pygame import PygameRenderer
 from Utils.Math import Math
+
+from USERDIR.Scripts.PlayerMovement import PlayerMovement
+from USERDIR.Scripts.Coin import Coin
 
 FPS = 60
 
@@ -26,6 +29,10 @@ pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
+
+# Init the image loader and load some images
+imageLoader = ImageLoader()
+imageLoader.autoLoadImages("USERDIR/Textures/")
 
 # Init the Input Handler
 inputHandler = Input(pygame)
@@ -36,41 +43,34 @@ moveSpeedY: int = 4
 moveSpeedX: int = 4
 events = pygame.event.get()
 
-# Some sample callbacks
-global object1CanMove
-global object2CanMove
-object1CanMove = ""
-object2CanMove = ""
-colTop1 = False
-def object1CollisionCallback(collidedWith, side):
-    #if (side[0] != "NONE"): print(side[0])
-    global object1CanMove
-    object1CanMove = side
-    global colTop1
-    colTop1 = side[1] == "BOTTOM"
-
-def object2CollisionCallback(collidedWith, side):
-    global object2CanMove
-    object2CanMove = side
-
-gameObjectHandler = GameObjectHandler()
+gameObjectHandler = GameObjectHandler(pygame.Vector2(1280, 720))
 
 pmScript = PlayerMovement(object, inputHandler)
 
-object.addComponent(RigidBody("RigidBody", object, 720, 1.2, bounciness=0, friction=0.02, fpsConstant=FPS))
-object.addComponent(BoxCollider("BoxCollider", 6, 3, pmScript.object1CollisionCallback))
+object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.02, fpsConstant=FPS))
+object.addComponent(BoxCollider("BoxCollider", object, 6, 3, pmScript.object1CollisionCallback))
 object.addComponent(pmScript)
 
 gameObjectHandler.registerGameObject(object)
 #physics = Physics.Physics(720)
 #physics.registerObject(object)
 
+coinObject: Objects.Sprite = Objects.Sprite("Coin1", imageLoader, pygame.Vector2(100, 500), 0, pygame.Vector2(75, 75), "coin1")
+coinScript = Coin(coinObject)
+coinObject2: Objects.Sprite = Objects.Sprite("Coin2", imageLoader, pygame.Vector2(200, 500), 0, pygame.Vector2(75, 75), "coin1")
+coinScript2 = Coin(coinObject2)
+
+coinObject.addComponent(RigidBody("RigidBody", coinObject, 700, 1, bounciness=0, friction=1, fpsConstant=FPS))
+coinObject.addComponent(coinScript)
+coinObject2.addComponent(RigidBody("RigidBody", coinObject2, 700, 1, bounciness=0, friction=1, fpsConstant=FPS))
+coinObject2.addComponent(coinScript2)
+gameObjectHandler.registerGameObject(coinObject)
+gameObjectHandler.registerGameObject(coinObject2)
 """
-object: Objects.Sprite = Objects.Sprite("CoolASF", pygame.Vector2(0, 500), 0, pygame.Vector2(100, 100), "USERDIR/Textures/coolasfnobg.png")
-object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.02, fpsConstant=FPS))
 """
 
-gameObjectHandler.registerGameObject(object)
+#gui = GUI()
+#gui.start()
 
 # Init the Renderer
 #window = Window("Renderpyg Example", size=(1280, 720))
@@ -85,7 +85,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT or inputHandler.isKeyPressed(pygame.K_ESCAPE):
             running = False
-
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("purple")
 
@@ -94,27 +93,12 @@ while running:
 
     # Basic Movement
 
-    if (inputHandler.isKeyPressed(pygame.K_l)):
-        if (object2CanMove[0] != "RIGHT"):
-            forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
-            forceDir.x = 8
-            object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
-    if (inputHandler.isKeyPressed(pygame.K_j)):
-        if (object2CanMove[0] != "LEFT"):
-            forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
-            forceDir.x = -8
-            object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
-    if (inputHandler.isKeyPressed(pygame.K_i) and object2.getComponent("RigidBody2").getIsGrounded()):
-        forceDir: pygame.Vector2 = object2.getComponent("RigidBody2").getForceDirection()
-        forceDir.y = -8
-        object2.getComponent("RigidBody2").setForce(forceDir, isMassiveY = False)
-
     #object.setRotation(object.getRotation() + 1)
     #print(object.getPosition(), object.getRotation())
 
     #print(object.getComponent("RigidBody").getForceDirection())
 
-    gameObjectHandler.updateThenDraw(pygame, screen)
+    gameObjectHandler.updateThenDraw(pygame, screen, object.getPosition(), 2)
 
     #physics.update()
 

@@ -7,9 +7,9 @@ from Components.Component import Component
 BoxCollider needs a RigidBody on the same object to work correctly.
 """
 class BoxCollider(Component):
-    def __init__(self, name, xTolerance, yTolerance, collisionCallback):
-        super().__init__(name)
-        self.parentGameObject = None
+    def __init__(self, name, gameObject, xTolerance, yTolerance, collisionCallback):
+        super().__init__(f"{name}{gameObject.getName()}")
+        self.parentGameObject = gameObject
         self.sceneColliders = dict()
         self.size = None
         self.position = None
@@ -22,7 +22,6 @@ class BoxCollider(Component):
 
     def start(self, gameObject: Objects.Rectangle, gameObjects: dict):
         # Start logic
-        self.parentGameObject = gameObject
 
         self.size = gameObject.getSize()
         self.velocity = gameObject.getComponent("RigidBody").getForceDirection()

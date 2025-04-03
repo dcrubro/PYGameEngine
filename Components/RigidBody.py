@@ -8,7 +8,7 @@ from Logging.Logger import Logger
 
 class RigidBody(Component):
     def __init__(self, name, gameObject: GameObject, groundY, mass, isSimulated = True, g = 9.81, bounciness = 0, friction = 0.1, fpsConstant = 60):
-        super().__init__(name)
+        super().__init__(f"{name}{gameObject.getName()}")
         self.__isSimulated = isSimulated
         self.__gravitationalVelocity: float = 0
         self.__rotationalForce: pygame.Vector2 = pygame.Vector2(0, 0)

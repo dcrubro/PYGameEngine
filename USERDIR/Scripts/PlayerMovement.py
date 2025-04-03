@@ -12,11 +12,16 @@ class PlayerMovement(Script):
         self.moveSpeed = 8
         self.object1CanMove = ["NONE", "NONE"]
         self.colTop1 = False
+        self.oG = 9.81*1.25
 
     def object1CollisionCallback(self, collidedWith, side):
         # if (side[0] != "NONE"): print(side[0])
         self.object1CanMove = side
         self.colTop1 = side[1] == "BOTTOM"
+
+    def start(self):
+        Logger.log("Set gravitational acceleration.", LogType.INFO, self.gameObject)
+        self.gameObject.getComponent("RigidBody").setG(self.oG)
 
     def update(self):
         #Logger.log("I'm being called", LogType.INFO, self.gameObject)
@@ -25,7 +30,7 @@ class PlayerMovement(Script):
         if (self.inputHandler.isKeyPressed(pygame.K_d)):
             if (self.object1CanMove[0] != "RIGHT" and not (frozenRight)):
                 forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-                forceDir.x = 8
+                forceDir.x = 6
                 self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
                 frozenLeft = False
             else:
@@ -34,7 +39,7 @@ class PlayerMovement(Script):
         if (self.inputHandler.isKeyPressed(pygame.K_a)):
             if (self.object1CanMove[0] != "LEFT" and not (frozenLeft)):
                 forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-                forceDir.x = -8
+                forceDir.x = -6
                 self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
                 frozenRight = False
             else:
@@ -42,7 +47,7 @@ class PlayerMovement(Script):
                 frozenLeft = True
         if (self.inputHandler.isKeyPressed(pygame.K_w) and self.gameObject.getComponent("RigidBody").getIsGrounded()):
             forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-            forceDir.y = -8
+            forceDir.y = -9
             self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
 
         # Top collision check
@@ -53,4 +58,4 @@ class PlayerMovement(Script):
             self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
             self.gameObject.getComponent("RigidBody").setIsGrounded(True)
         else:
-            self.gameObject.getComponent("RigidBody").setG(9.81)
+            self.gameObject.getComponent("RigidBody").setG(self.oG)

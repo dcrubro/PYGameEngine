@@ -1,6 +1,7 @@
 import pygame
 import Components.Component
 from Scripting.Script import Script
+from Renderer.ImageLoader import ImageLoader
 
 class GameObject:
     def __init__(self, name, position, rotation, underCenterY, components = dict()):
@@ -50,7 +51,7 @@ class GameObject:
         return self.__components
 
     def getComponent(self, componentName: str):
-        return self.__components.get(componentName)
+        return self.__components.get(f"{componentName}{self.getName()}")
 
     def setComponents(self, v: dict):
         self.__components = v
@@ -62,9 +63,9 @@ class GameObject:
         # Runs on the first frame
         for k, v in self.__components.items():
             if isinstance(v, Script):
-                try:
+                if hasattr(v, "start"):
                     v.start()
-                except AttributeError:
+                else:
                     continue
             else:
                 v.start(self, gameObjects)
@@ -73,9 +74,9 @@ class GameObject:
         #Runs every frame
         for k, v in self.__components.items():
             if isinstance(v, Script):
-                try:
+                if hasattr(v, "update"):
                     v.update()
-                except AttributeError:
+                else:
                     continue
             else:
                 v.update(self, gameObjects)
@@ -145,8 +146,9 @@ class Circle(GameObject):
         pygameInstance.draw.circle(screenInstance, self.color, pygame.Vector2(self.x, self.y), self.radius)
 
 class Sprite(GameObject):
-    def __init__(self, name, position, rotation, size, texture):
+    def __init__(self, name, imgLoaderPtr: ImageLoader, position, rotation, size, texture):
         super().__init__(name, position, rotation, (size.y / 2))
+        self.imgLoaderPtr = imgLoaderPtr
         self.__size = size
         self.__texture = texture
 
@@ -159,9 +161,16 @@ class Sprite(GameObject):
     def getSize(self):
         return self.__size
 
+    def getTexture(self):
+        return self.__texture # Returns a path
+
+    def setTexture(self, v: str):
+        self.__texture = v
+
     # Override
     def draw(self, pygameInstance, screenInstance, rotation):
-        image = pygame.image.load(self.__texture)
+        image = self.imgLoaderPtr.accessImage(self.__texture)
+
         self.__surface = pygame.Surface(self.__size)
         self.__surface.set_colorkey((0, 0, 0))  # Make black transparent
 

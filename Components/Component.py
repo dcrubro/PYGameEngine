@@ -1,7 +1,10 @@
-#from GameObject import GameObject
-
+"""
+Component.py
+A template for all other components to inherit from.
+When added to a GameObject, the component name has to be unique, since the components are assigned to a dictionary, and can override others.
+"""
 class Component:
-    def __init__(self, name, ):
+    def __init__(self, name):
         self.__name = name
 
     def getName(self):

@@ -37,7 +37,7 @@ class TextureFont():
 		'''
 		Initialize TextureFont for use with pygame._sdl2 GPU renderer
 
-		:param renderer: pygame._sdl2.video.Renderer to draw on
+		:param renderer: pygame._sdl2.video.IO to draw on
 		:param filename: path to a pygame.font.Font compatible file (ttf)
 		:param size: point size for font
 		'''
@@ -94,7 +94,7 @@ class TextureFont():
 		passing a list of (filename, size) tuples. Will raise an error if
 		the texture height would exceed 1024
 
-		:param renderer: pygame._sdl2.video.Renderer to draw on
+		:param renderer: pygame._sdl2.video.IO to draw on
 		:param fonts: list of (filename, size) tuples for each font
 		"""
 		total_height = 0
@@ -596,7 +596,7 @@ def round_patch(renderer, radius, color, sizes, colors):
 	Generate a NinePatch object using a set of rounded rectangles of various
 	thickness allowing multiple outlines of different colors.
 
-	:param renderer: pygame._sdl2.video.Renderer to draw on
+	:param renderer: pygame._sdl2.video.IO to draw on
 	:param radius: radius of circular edges of the rounded rectangles
 	:param color: 3-tuple or color object for the central area
 	:param sizes: list of int sizes of outline layers starting from the outside

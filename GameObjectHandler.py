@@ -22,6 +22,18 @@ class GameObjectHandler:
                 if hasattr(comp, "load"):
                     comp.load()
 
+    def destroyGameObject(self, name):
+        obj = self.__gameObjects.get(name)
+        if obj:
+            for comp in obj.getComponents().values():
+                if isinstance(comp, Script):
+                    if hasattr(comp, "unload"):
+                        comp.unload()
+                del comp # Clean up
+            #a = len(self.__gameObjects)
+            del self.__gameObjects[name]
+            #if (a != len(self.__gameObjects)): print("yuh")
+
     def start(self):
         # Start logic
         for k, v in self.__gameObjects.items():
@@ -30,11 +42,21 @@ class GameObjectHandler:
     def update(self):
         #Update logic
         for k, v in self.__gameObjects.items():
+            if hasattr(v, "markedForDestruction"):
+                #if hasattr(v, "markedRestartAllComponents"):
+                #    print("yar")
+                self.destroyGameObject(k)
+                self.start()
+                continue # Prevent update() from firing
             v.update(self.__gameObjects)
 
     def updateThenDraw(self, pygameInstance: pygame, screenInstance, centerPos: pygame.Vector2, toleranceMultiplier = 1):
         # Update logic
-        for k, v in self.__gameObjects.items():
+        items = self.__gameObjects.copy() # Protect against dict size changes
+        for k, v in items.items():
+            if hasattr(v, "markedForDestruction"):
+                self.destroyGameObject(k)
+                continue
             v.update(self.__gameObjects)
             if (v.getPosition().x >= (centerPos.x - (self.__srceenDimensions.x // 2) * toleranceMultiplier) and v.getPosition().x <= (centerPos.x + (self.__srceenDimensions.x // 2) * toleranceMultiplier)):
                 v.draw(pygameInstance, screenInstance, v.getRotation())
@@ -42,5 +64,8 @@ class GameObjectHandler:
     def drawThenUpdate(self, pygameInstance: pygame, screenInstance, centerPos: pygame.Vector2):
         # Update logic
         for k, v in self.__gameObjects.items():
+            if hasattr(v, "markedForDestruction"):
+                self.destroyGameObject(k)
+                continue
             v.draw(pygameInstance, screenInstance, v.getRotation())
             v.update(self.__gameObjects)

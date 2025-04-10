@@ -26,3 +26,7 @@ class Script:
     def update(self):
         # Called every frame
         pass
+
+    def unload(self):
+        # Called on destroy (Kind of like a destructor)
+        pass

@@ -13,6 +13,7 @@ class PlayerMovement(Script):
         self.object1CanMove = ["NONE", "NONE"]
         self.colTop1 = False
         self.oG = 9.81*1.25
+        self.coinsCollected = 0
 
     def object1CollisionCallback(self, collidedWith, side):
         # if (side[0] != "NONE"): print(side[0])

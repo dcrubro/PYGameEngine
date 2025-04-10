@@ -20,8 +20,12 @@ class BoxCollider(Component):
         self.__yTolerance = yTolerance
         self.velocity = None
 
+        # Temporary stuff
+        self.cycleObjects = 0
+
     def start(self, gameObject: Objects.Rectangle, gameObjects: dict):
         # Start logic
+        self.sceneColliders = dict() # Reset the colliders
 
         self.size = gameObject.getSize()
         self.velocity = gameObject.getComponent("RigidBody").getForceDirection()
@@ -29,11 +33,14 @@ class BoxCollider(Component):
         self.rotation = gameObject.getRotation()
         self.previousPosition = self.position  # Initialize previous position
 
+        #print(gameObjects.items())
         # Get all colliders in scene
         for k, v in gameObjects.items():
             for k2, v2 in v.getComponents().items():
                 if isinstance(v2, BoxCollider):
                     self.sceneColliders[k] = v2
+
+        self.cycleObjects = len(gameObjects)
 
     def getSceneColliders(self):
         return self.sceneColliders
@@ -65,12 +72,23 @@ class BoxCollider(Component):
     def setParentGameObject(self, parent: GameObject.Objects.GameObject):
         self.parentGameObject = parent
 
+    def getPreviousPosition(self):
+        return self.previousPosition
+
+    def getXTolerance(self):
+        return self.__xTolerance
+
+    def getYTolerance(self):
+        return self.__yTolerance
+
     def update(self, gameObject: Objects.Rectangle, gameObjects: dict):
         self.position = gameObject.getPosition()
         self.size = gameObject.getSize()
         self.velocity = gameObject.getComponent("RigidBody").getForceDirection()
         self.mass = gameObject.getComponent("RigidBody").getMass()
-        #print(self.velocity)
+
+        if len(gameObjects) != self.cycleObjects:
+            self.start(self.getParentGameObject(), gameObjects)
 
         for key, collider in self.sceneColliders.items():
             if collider == self:

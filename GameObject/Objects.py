@@ -1,14 +1,18 @@
 import pygame
 import Components.Component
+from Enums.LogType import LogType
 from Scripting.Script import Script
-from Renderer.ImageLoader import ImageLoader
+from IO.ResourceLoader import ResourceLoader
+from Logging.Logger import Logger
 
 class GameObject:
-    def __init__(self, name, position, rotation, underCenterY, components = dict()):
+    def __init__(self, name, position, rotation, underCenterY, components = None):
         self.__position = position
         self.__rotation = rotation
-        self.name = name
+        self.__name = name
         self.__underCenterY = underCenterY
+        if components == None:
+            components = dict()
         self.__components = components
 
     def moveBy(self, v: pygame.Vector2):
@@ -36,10 +40,10 @@ class GameObject:
         self.__rotation = v
 
     def getName(self):
-        return self.name
+        return self.__name
 
     def setName(self, v):
-        self.name = v
+        self.__name = v
 
     def getUnderCenterY(self):
         return self.__underCenterY
@@ -58,6 +62,11 @@ class GameObject:
 
     def addComponent(self, v: Components.Component):
         self.__components[v.getName()] = v
+
+    def destroySelf(self, restartAllComponents):
+        self.markedForDestruction = True # Destroys the object on the next update loop
+        self.markedRestartAllComponents = restartAllComponents
+        Logger.log(f"Destroyed {self.getName()}!", LogType.INFO, self)
 
     def start(self, gameObjects):
         # Runs on the first frame
@@ -104,6 +113,9 @@ class Rectangle(GameObject):
     def getRect(self):
         return self.__rect
 
+    def getColor(self):
+        return self.color
+
     def draw(self, pygameInstance, screenInstance, rotation):
         self.__surface = pygame.Surface(self.__size)
         self.__surface.set_colorkey((0, 0, 0))  # Make black transparent
@@ -142,13 +154,17 @@ class Circle(GameObject):
     def getRadius(self):
         return self.radius
 
+    def getColor(self):
+        return self.color
+
     def draw(self, pygameInstance, screenInstance, rotation):
         pygameInstance.draw.circle(screenInstance, self.color, pygame.Vector2(self.x, self.y), self.radius)
 
+# For most uses, you should probably use this GameObject type
 class Sprite(GameObject):
-    def __init__(self, name, imgLoaderPtr: ImageLoader, position, rotation, size, texture):
+    def __init__(self, name, resLoaderPtr: ResourceLoader, position, rotation, size, texture):
         super().__init__(name, position, rotation, (size.y / 2))
-        self.imgLoaderPtr = imgLoaderPtr
+        self.__resLoaderPtr = resLoaderPtr
         self.__size = size
         self.__texture = texture
 
@@ -169,7 +185,7 @@ class Sprite(GameObject):
 
     # Override
     def draw(self, pygameInstance, screenInstance, rotation):
-        image = self.imgLoaderPtr.accessImage(self.__texture)
+        image = self.__resLoaderPtr.accessResource(self.__texture if self.__texture else "missing_texture")
 
         self.__surface = pygame.Surface(self.__size)
         self.__surface.set_colorkey((0, 0, 0))  # Make black transparent

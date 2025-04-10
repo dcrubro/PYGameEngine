@@ -42,6 +42,12 @@ class RigidBody(Component):
     def setForceDirection(self, v: pygame.Vector2):
         self.__forceDirection = v
 
+    def getRotationalForce(self):
+        return self.__rotationalForce
+
+    def setRotationalForce(self, v: pygame.Vector2):
+        self.__rotationalForce = v
+
     def getG(self):
         return self.__g
 
@@ -71,6 +77,18 @@ class RigidBody(Component):
 
     def setMass(self, v: float):
         self.__mass = v
+
+    def getBounciness(self):
+        return self.__bounciness
+
+    def setBounciness(self, v: float):
+        self.__bounciness = v
+
+    def getFriction(self):
+        return self.__friction
+
+    def setFriction(self, v: float):
+        self.__friction = v
 
     # GENERAL FUNCTIONS
     def addForce(self, forceDirection: pygame.Vector2, forceType: ForceType, isMassiveX = True, isMassiveY = True):

@@ -1,7 +1,7 @@
 '''
-tilemap: Tilemap Renderer
+tilemap: Tilemap IO
 
-Renderer tilemaps loaded with pytmx or built in functions. Uses
+IO tilemaps loaded with pytmx or built in functions. Uses
 the pygame._sdl2 GPU renderer.
 
 This file is part of renderpyg
@@ -287,7 +287,7 @@ def pgvideo_image_loader(renderer, filename, colorkey, **kwargs):
 	Returns a generator function that creates Images based on the
 	texture and given rects
 
-	:param renderer: active video.Renderer
+	:param renderer: active video.IO
 	:param filename: path to Tiled tmx tilemap file
 	:param colorkey: unused surface colorkey unused in GPU rendering
 	:rvalue: generator function
@@ -328,7 +328,7 @@ def load_tmx(renderer, filename, *args, **kwargs):
 	This function simplifies loading tilemaps from tiled tmx files
 	It uses a partial function to provide a renderer reference to pytmx
 
-	:param renderer: active video.Renderer
+	:param renderer: active video.IO
 	:param filename: path to Tiled tmx tilemap file
 	:rvalue pytmx.TiledMap
 	'''

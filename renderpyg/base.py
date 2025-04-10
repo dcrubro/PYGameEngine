@@ -117,7 +117,7 @@ def load_texture(renderer, filename, scale=None):
 	Returns an texture loaded from given image file and attached to
 	given renderer.
 
-	:param renderer: active pygame._sdl2.video.Renderer object
+	:param renderer: active pygame._sdl2.video.IO object
 	:param filename: path to image file
 	:rvalue: texture object
 	"""

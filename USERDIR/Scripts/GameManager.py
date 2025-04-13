@@ -7,6 +7,7 @@ from GameObjectHandler import GameObjectHandler
 
 class GameManager(Script):
     _coins = 0
+    _scrollSpeed = 1
     def __init__(self, gameObject):
         super().__init__(f"GameManager{gameObject.getName()}", gameObject)
         self.superSecretScriptIdentifierFlag = True
@@ -23,20 +24,21 @@ class GameManager(Script):
             self.previousPlayerPosition = pygame.Vector2(0, 0)  # Fallback
 
     def update(self, screenResolution: pygame.Vector2, gameObjHandl: GameObjectHandler):
-        player = gameObjHandl.getObjectByTag("Player")
-        if not player:
-            Logger.log("Player not found during update.", LogType.ERROR, self)
-            return
+        #player = gameObjHandl.getObjectByTag("Player")
+        #if not player:
+        #    Logger.log("Player not found during update.", LogType.ERROR, self)
+        #    return
 
-        playerPosition: pygame.Vector2 = player.getPosition()
+        #playerPosition: pygame.Vector2 = player.getPosition()
 
-        if self.previousPlayerPosition is None:
-            self.previousPlayerPosition = playerPosition
-            return  # Skip first frame
+        #if self.previousPlayerPosition is None:
+        #    self.previousPlayerPosition = playerPosition
+        #    return  # Skip first frame
 
-        delta = playerPosition - self.previousPlayerPosition
+        #delta = playerPosition - self.previousPlayerPosition
+        delta = pygame.Vector2(self._scrollSpeed, 0)
 
-        Logger.log(f"Delta Vector: {delta.x}, {delta.y}", LogType.INFO, self)
+        #Logger.log(f"Delta Vector: {delta.x}, {delta.y}", LogType.INFO, self)
 
         for k, v in gameObjHandl.getGameObjects().items():
             if v.hasTag("Player"):
@@ -54,4 +56,10 @@ class GameManager(Script):
     def addCoin(cls):
         cls._coins += 1
         Logger.log(f"Coins: {cls._coins}", LogType.INFO, cls)
+        if cls._coins % 10 == 0:
+            cls.increaseSpeed()
         return cls._coins
+
+    @classmethod
+    def increaseSpeed(cls):
+        cls._scrollSpeed += 0.2

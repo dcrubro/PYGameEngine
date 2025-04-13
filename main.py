@@ -46,9 +46,7 @@ gameManager = Objects.GameObject = Objects.GameObject("GameObject", pygame.Vecto
 gMScript = GameManager(gameManager)
 gameManager.addComponent(gMScript)
 
-object: Objects.Rectangle = Objects.Rectangle("PlayerObj", pygame.Vector2(800, 500), 0, pygame.Vector2(100, 100), "blue")
-moveSpeedY: int = 4
-moveSpeedX: int = 4
+object: Objects.Sprite = Objects.Sprite("PlayerObj", resourceLoader, pygame.Vector2(200, 200), 0, pygame.Vector2(75, 75), "Bird1")
 events = pygame.event.get()
 
 gameObjectHandler = GameObjectHandler(pygame.Vector2(1280, 720))
@@ -63,13 +61,13 @@ gameObjectHandler.registerGameObject(object)
 #physics = Physics.Physics(720)
 #physics.registerObject(object)
 
-coinObject: Objects.Sprite = Objects.Sprite("Coin1", resourceLoader, pygame.Vector2(100, 500), 0, pygame.Vector2(25, 25), "coin1")
+coinObject: Objects.Sprite = Objects.Sprite("Coin1", resourceLoader, pygame.Vector2(100, 500), 0, pygame.Vector2(50, 50), "coin1")
 coinScript = Coin(coinObject)
-coinObject2: Objects.Sprite = Objects.Sprite("Coin2", resourceLoader, pygame.Vector2(400, 500), 0, pygame.Vector2(25, 25), "coin1")
+coinObject2: Objects.Sprite = Objects.Sprite("Coin2", resourceLoader, pygame.Vector2(400, 500), 0, pygame.Vector2(50, 50), "coin1")
 coinScript2 = Coin(coinObject2)
-coinObject3: Objects.Sprite = Objects.Sprite("Coin3", resourceLoader, pygame.Vector2(200, 500), 0, pygame.Vector2(25, 25), "coin1")
+coinObject3: Objects.Sprite = Objects.Sprite("Coin3", resourceLoader, pygame.Vector2(200, 500), 0, pygame.Vector2(50, 50), "coin1")
 coinScript3 = Coin(coinObject3)
-coinObject4: Objects.Sprite = Objects.Sprite("Coin4", resourceLoader, pygame.Vector2(300, 500), 0, pygame.Vector2(25, 25), "coin1")
+coinObject4: Objects.Sprite = Objects.Sprite("Coin4", resourceLoader, pygame.Vector2(300, 500), 0, pygame.Vector2(50, 50), "coin1")
 coinScript4 = Coin(coinObject4)
 
 coinObject.addComponent(RigidBody("RigidBody", coinObject, 680, 1, bounciness=0, friction=1, fpsConstant=FPS, isSimulated=False))

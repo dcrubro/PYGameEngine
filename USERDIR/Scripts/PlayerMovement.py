@@ -10,7 +10,7 @@ class PlayerMovement(Script):
         self.superSecretScriptIdentifierFlag = True
         self.inputHandler = inputHandler
         self.moveSpeed = 8
-        self.jumpPower = 10
+        self.jumpPower = 6
         self.object1CanMove = ["NONE", "NONE"]
         self.colTop1 = False
         self.oG = 9.81*2.5
@@ -31,6 +31,7 @@ class PlayerMovement(Script):
         #Logger.log("I'm being called", LogType.INFO, self.gameObject)
         frozenRight = False
         frozenLeft = False
+        """
         if (self.inputHandler.isKeyPressed(pygame.K_d)):
             if (self.object1CanMove[0] != "RIGHT" and not (frozenRight)):
                 forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
@@ -49,7 +50,8 @@ class PlayerMovement(Script):
             else:
                 self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(0, 0), isMassiveY=False)
                 frozenLeft = True
-        if (self.inputHandler.isKeyPressed(pygame.K_w) and self.gameObject.getComponent("RigidBody").getIsGrounded()):
+        """
+        if (self.inputHandler.isKeyPressed(pygame.K_w)):
             forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
             forceDir.y = -self.jumpPower
             self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)

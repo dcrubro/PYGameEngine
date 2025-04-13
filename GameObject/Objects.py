@@ -199,6 +199,7 @@ class Sprite(GameObject):
     # Override
     def draw(self, pygameInstance, screenInstance, rotation):
         image = self.__resLoaderPtr.accessResource(self.__texture if self.__texture else "missing_texture")
+        image = pygame.transform.scale(image, self.getSize())
 
         self.__surface = pygame.Surface(self.__size)
         self.__surface.set_colorkey((0, 0, 0))  # Make black transparent

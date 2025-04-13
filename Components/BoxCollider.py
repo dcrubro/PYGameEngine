@@ -90,26 +90,49 @@ class BoxCollider(Component):
         if len(gameObjects) != self.cycleObjects:
             self.start(self.getParentGameObject(), gameObjects)
 
+        # Calculate this object's bounding box
+        selfLeft = self.position.x - self.size.x / 2
+        selfRight = self.position.x + self.size.x / 2
+        selfTop = self.position.y - self.size.y / 2
+        selfBottom = self.position.y + self.size.y / 2
+
         for key, collider in self.sceneColliders.items():
             if collider == self:
                 continue
 
-            otherColliderPosition = collider.getPosition()
-            otherColliderSize = collider.getSize()
+            otherPosition = collider.getPosition()
+            otherSize = collider.getSize()
 
-            sideX = "NONE"
-            sideY = "NONE"
+            otherLeft = otherPosition.x - otherSize.x / 2
+            otherRight = otherPosition.x + otherSize.x / 2
+            otherTop = otherPosition.y - otherSize.y / 2
+            otherBottom = otherPosition.y + otherSize.y / 2
 
-            if ((self.position.y < (otherColliderPosition.y + (otherColliderSize.y))) and (self.position.y > (otherColliderPosition.y - (otherColliderSize.y)))):
-                if (abs(self.position.x - (otherColliderPosition.x - otherColliderSize.x)) < self.__xTolerance - self.velocity.x * self.mass):
-                    sideX = "LEFT"
-                if (abs(self.position.x - (otherColliderPosition.x + otherColliderSize.x)) < self.__xTolerance + self.velocity.x * self.mass):
-                    sideX = "RIGHT"
+            # Apply small tolerances
+            expandedXTolerance = self.__xTolerance
+            expandedYTolerance = self.__yTolerance
 
-            if ((self.position.x < (otherColliderPosition.x + (otherColliderSize.x))) and (self.position.x > (otherColliderPosition.x - (otherColliderSize.x)))):
-                if (abs(self.position.y - (otherColliderPosition.y - otherColliderSize.y)) < self.__yTolerance - self.velocity.y * self.mass):
-                    sideY = "TOP"
-                if (abs(self.position.y - (otherColliderPosition.y + otherColliderSize.y)) < self.__yTolerance + self.velocity.y * self.mass):
-                    sideY = "BOTTOM"
+            if (selfRight > otherLeft - expandedXTolerance and
+                    selfLeft < otherRight + expandedXTolerance and
+                    selfBottom > otherTop - expandedYTolerance and
+                    selfTop < otherBottom + expandedYTolerance):
 
-            self.collisionCallback(collider, (sideX, sideY))
+                # Calculate the side of collision (simple version)
+                dx = (otherPosition.x - self.position.x)
+                dy = (otherPosition.y - self.position.y)
+
+                sideX = "NONE"
+                sideY = "NONE"
+
+                if abs(dx) > abs(dy):
+                    if dx > 0:
+                        sideX = "LEFT"
+                    else:
+                        sideX = "RIGHT"
+                else:
+                    if dy > 0:
+                        sideY = "TOP"
+                    else:
+                        sideY = "BOTTOM"
+
+                self.collisionCallback(collider, (sideX, sideY))

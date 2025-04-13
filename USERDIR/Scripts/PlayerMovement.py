@@ -10,17 +10,20 @@ class PlayerMovement(Script):
         self.superSecretScriptIdentifierFlag = True
         self.inputHandler = inputHandler
         self.moveSpeed = 8
+        self.jumpPower = 10
         self.object1CanMove = ["NONE", "NONE"]
         self.colTop1 = False
-        self.oG = 9.81*1.25
+        self.oG = 9.81*2.5
         self.coinsCollected = 0
 
     def object1CollisionCallback(self, collidedWith, side):
         # if (side[0] != "NONE"): print(side[0])
-        self.object1CanMove = side
-        self.colTop1 = side[1] == "BOTTOM"
+        if (not(collidedWith.getParentGameObject().hasTag("Coin"))):
+            self.object1CanMove = side
+            self.colTop1 = side[1] == "BOTTOM"
 
     def start(self):
+        self.gameObject.addTag("Player") # Make sure to tag correctly
         Logger.log("Set gravitational acceleration.", LogType.INFO, self.gameObject)
         self.gameObject.getComponent("RigidBody").setG(self.oG)
 
@@ -31,7 +34,7 @@ class PlayerMovement(Script):
         if (self.inputHandler.isKeyPressed(pygame.K_d)):
             if (self.object1CanMove[0] != "RIGHT" and not (frozenRight)):
                 forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-                forceDir.x = 6
+                forceDir.x = self.moveSpeed
                 self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
                 frozenLeft = False
             else:
@@ -40,7 +43,7 @@ class PlayerMovement(Script):
         if (self.inputHandler.isKeyPressed(pygame.K_a)):
             if (self.object1CanMove[0] != "LEFT" and not (frozenLeft)):
                 forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-                forceDir.x = -6
+                forceDir.x = -self.moveSpeed
                 self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
                 frozenRight = False
             else:
@@ -48,7 +51,7 @@ class PlayerMovement(Script):
                 frozenLeft = True
         if (self.inputHandler.isKeyPressed(pygame.K_w) and self.gameObject.getComponent("RigidBody").getIsGrounded()):
             forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-            forceDir.y = -9
+            forceDir.y = -self.jumpPower
             self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
 
         # Top collision check

@@ -34,6 +34,10 @@ class GameObjectHandler:
             del self.__gameObjects[name]
             #if (a != len(self.__gameObjects)): print("yuh")
 
+    def getObjectByTag(self, tag):
+        for k, v in self.__gameObjects.items():
+            if v.hasTag(tag): return v
+
     def start(self):
         # Start logic
         for k, v in self.__gameObjects.items():

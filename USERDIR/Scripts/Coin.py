@@ -3,6 +3,7 @@ from Input.Input import Input
 from Logging.Logger import Logger
 from Enums.LogType import LogType
 import pygame
+from USERDIR.Scripts.GameManager import GameManager
 
 class Coin(Script):
     def __init__(self, gameObject):
@@ -14,14 +15,15 @@ class Coin(Script):
     def collisionCallback(self, collidedWith, side):
         # if (side[0] != "NONE"): print(side[0])
         #Logger.log(f"Bruh", LogType.INFO, self)
-        #Logger.log(f"{collidedWith.getParentGameObject().getName()}", LogType.INFO, self)
+        Logger.log(f"{collidedWith.getParentGameObject().getName()}", LogType.INFO, self)
         if (collidedWith.getParentGameObject().getName() == "PlayerObj"):
             Logger.log(f"{self.gameObject.getName()} (OBJ) Collided with {collidedWith.getParentGameObject().getName()}!", LogType.INFO, self)
+            GameManager.addCoin()
             # Destroy the object
             self.gameObject.destroySelf(True)
 
     def start(self):
-        pass
+        self.gameObject.addTag("Coin")
 
     def update(self):
         # A simple animation cycle for the coin.

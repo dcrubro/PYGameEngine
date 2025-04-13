@@ -11,6 +11,7 @@ class GameObject:
         self.__rotation = rotation
         self.__name = name
         self.__underCenterY = underCenterY
+        self.__tags = set()
         if components == None:
             components = dict()
         self.__components = components
@@ -62,6 +63,18 @@ class GameObject:
 
     def addComponent(self, v: Components.Component):
         self.__components[v.getName()] = v
+
+    def addTag(self, v):
+        self.__tags.add(v)
+
+    def removeTag(self, v):
+        self.__tags.remove(v)
+
+    def hasTag(self, v):
+        return v in self.__tags
+
+    def getTags(self):
+        return self.__tags
 
     def destroySelf(self, restartAllComponents):
         self.markedForDestruction = True # Destroys the object on the next update loop

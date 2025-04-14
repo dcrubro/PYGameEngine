@@ -5,9 +5,11 @@ from Enums.LogType import LogType
 import pygame
 from GameObjectHandler import GameObjectHandler
 
+# GameManager is a special type of script, which should be used for general tracking/event handling in your games.
+# Only one of these should exist per game.
 class GameManager(Script):
     _coins = 0
-    _scrollSpeed = 1
+    _scrollSpeed = 2
     def __init__(self, gameObject):
         super().__init__(f"GameManager{gameObject.getName()}", gameObject)
         self.superSecretScriptIdentifierFlag = True

@@ -2,10 +2,11 @@ from Scripting.Script import Script
 from Input.Input import Input
 from Logging.Logger import Logger
 from Enums.LogType import LogType
+from Sound.Sound import Sound
 import pygame
 
 class PlayerMovement(Script):
-    def __init__(self, gameObject, inputHandler):
+    def __init__(self, gameObject, inputHandler, soundHandler: Sound):
         super().__init__("PlayerMovement", gameObject)
         self.superSecretScriptIdentifierFlag = True
         self.inputHandler = inputHandler
@@ -15,6 +16,9 @@ class PlayerMovement(Script):
         self.colTop1 = False
         self.oG = 9.81*2.5
         self.coinsCollected = 0
+        self.soundHandler: Sound = soundHandler
+        self.frames1 = 0
+        self.frames2 = 0
 
     def object1CollisionCallback(self, collidedWith, side):
         # if (side[0] != "NONE"): print(side[0])
@@ -29,32 +33,6 @@ class PlayerMovement(Script):
 
     def update(self):
         #Logger.log("I'm being called", LogType.INFO, self.gameObject)
-        frozenRight = False
-        frozenLeft = False
-        """
-        if (self.inputHandler.isKeyPressed(pygame.K_d)):
-            if (self.object1CanMove[0] != "RIGHT" and not (frozenRight)):
-                forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-                forceDir.x = self.moveSpeed
-                self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
-                frozenLeft = False
-            else:
-                self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(0, 0), isMassiveY=False)
-                frozenRight = True
-        if (self.inputHandler.isKeyPressed(pygame.K_a)):
-            if (self.object1CanMove[0] != "LEFT" and not (frozenLeft)):
-                forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-                forceDir.x = -self.moveSpeed
-                self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
-                frozenRight = False
-            else:
-                self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(0, 0), isMassiveY=False)
-                frozenLeft = True
-        """
-        if (self.inputHandler.isKeyPressed(pygame.K_w)):
-            forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-            forceDir.y = -self.jumpPower
-            self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
 
         # Top collision check
         if (self.colTop1):
@@ -65,3 +43,19 @@ class PlayerMovement(Script):
             self.gameObject.getComponent("RigidBody").setIsGrounded(True)
         else:
             self.gameObject.getComponent("RigidBody").setG(self.oG)
+
+        if self.frames1 < 10:
+            self.frames1 += 1
+            return # Skip
+
+        frozenRight = False
+        frozenLeft = False
+        if (self.inputHandler.isKeyPressed(pygame.K_w) and self.frames1 % 10 == 0):
+            # Play sound
+            self.soundHandler.playSound("jump", 0.15)
+            forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
+            forceDir.y = -self.jumpPower
+            self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
+            self.frames1 = 0
+
+        #self.frames1 += 1

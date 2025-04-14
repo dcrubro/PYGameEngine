@@ -1,4 +1,5 @@
 import pygame
+import copy
 
 from GameObject.Objects import GameObject
 from Scripting.Script import Script
@@ -15,6 +16,8 @@ class GameObjectHandler:
         self.__gameObjects = v
 
     def registerGameObject(self, object: GameObject):
+        #deepCopy = copy.deepcopy(object) # Creating a deep copy ensures that creation of objects in loops/scopes is possible.
+        # self.__gameObjects[deepCopy.getName()] = deepCopy
         self.__gameObjects[object.getName()] = object
         # Call load on all scripts
         for comp in object.getComponents().values():

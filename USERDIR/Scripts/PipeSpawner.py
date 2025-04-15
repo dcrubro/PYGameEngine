@@ -1,4 +1,6 @@
 import pygame
+
+from Components.RigidBody import RigidBody
 from GameObject.Objects import *
 from Scripting.Script import Script
 from IO.ResourceLoader import ResourceLoader
@@ -6,6 +8,9 @@ from GameObjectHandler import GameObjectHandler
 import math
 from USERDIR.Scripts.AutoKillComp import AutoKillComp
 import random
+
+from Utils.Math import Math
+
 
 class PipeSpawner(Script):
     def __init__(self, gameObject, gMHandl, resLoaderPtr):
@@ -17,34 +22,26 @@ class PipeSpawner(Script):
 
     def spawnSection(self):
         randomId = random.randint(-32767, 32767)
-        randOut = random.randint(1, 4)
+        pipeWidth = 125
+        gapSize = 100
+        pipeBodHeight = 600
 
-        # Due to the limitations of python, and the amount of calculations that are made with physics, rendering, etc., you shouldn't carelessly add objects like this.
-        # This is simply a proof of concept
-        objp = Sprite(f"Pipe{randomId}", self.resLoaderPtr, pygame.Vector2(1350, 0), 0, pygame.Vector2(125, 125 * (randOut + 1)), "Pipe")
-        kllp = AutoKillComp(objp)
-        objp.addComponent(kllp)
-        self.gMHandl.registerGameObject(objp)
+        gapY = random.randint(150, 500)
 
-        obj = Sprite(f"PipeEnd{randomId}", self.resLoaderPtr, pygame.Vector2(1350, (randOut + 0) * 125), 0, pygame.Vector2(125, 125), "PipeEnd")
-        kll = AutoKillComp(obj)
-        obj.addComponent(kll)
-        self.gMHandl.registerGameObject(obj)
+        topPipeY = gapY - pipeBodHeight
+        objTop = Sprite(f"PipeTop{randomId}", self.resLoaderPtr, pygame.Vector2(1350, topPipeY), 0,
+                         pygame.Vector2(pipeWidth, pipeBodHeight), "Pipe")
+        objTop.addComponent(AutoKillComp(objTop))
+        objTop.addTag(RigidBody("RigidBody", objTop, 0, 1, isSimulated=False))
+        self.gMHandl.registerGameObject(objTop)
 
-        """
-        objd = Sprite(f"PipeEndD{randomId}", self.resLoaderPtr, pygame.Vector2(1350, (randOut + 0) * 125), 180, pygame.Vector2(125, 125), "PipeEnd")
-        klld = AutoKillComp(objd)
-        objd.addComponent(klld)
-        self.gMHandl.registerGameObject(objd)
-        """
-
-        """
-        objr = Sprite(f"PipeD{randomId}", self.resLoaderPtr, pygame.Vector2(1350, 125 * (randOut + 2)), 0,pygame.Vector2(125, 125 * 10), "Pipe")
-        kllr = AutoKillComp(objr)
-        objr.addComponent(kllr)
-        self.gMHandl.registerGameObject(objr)
-        """
-
+        bottomPipeY = Math.clamp(gapY + gapSize + 60, 420, 32767)
+        print(bottomPipeY)
+        #bottomPipeY = 404
+        objBot = Sprite(f"PipeBot{randomId}", self.resLoaderPtr, pygame.Vector2(1350, bottomPipeY + 50), 0,
+                         pygame.Vector2(pipeWidth, pipeBodHeight * 0.9), "Pipe")
+        objBot.addComponent(AutoKillComp(objBot))
+        self.gMHandl.registerGameObject(objBot)
     def start(self):
         pass
 

@@ -101,6 +101,8 @@ gameManager.getComponent("GameManager").start(gameObjectHandler)
 #saveLoad.saveData("USERDIR/Saves/object.bin", saveLoad.serializeGameObject(object))
 
 while running:
+    pygame.display.set_caption(f'PYGameEngine - FPS: {round(clock.get_fps(), 2)}')
+
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():

@@ -21,7 +21,7 @@ class ResourceLoader:
             Logger.log(f"A resource with the name '{name}' is already loaded! The already loaded resource will be overwritten!", LogType.WARNING, self)
 
         if path.endswith((".png", ".jpg")):
-            resource = pygame.image.load(path)
+            resource = pygame.image.load(path).convert_alpha()
             self.__resources[name] = resource
             Logger.log(f"Resource at {path} has been loaded as '{name}'.", LogType.INFO, self)
         elif path.endswith(".wav"):

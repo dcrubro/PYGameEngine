@@ -2,6 +2,8 @@ import pygame
 import GameObject.Objects
 from GameObject import Objects
 from Components.Component import Component
+from Logging.Logger import Logger
+from Enums.LogType import LogType
 
 """
 BoxCollider needs a RigidBody on the same object to work correctly.
@@ -82,6 +84,7 @@ class BoxCollider(Component):
         return self.__yTolerance
 
     def update(self, gameObject: Objects.Rectangle, gameObjects: dict):
+        # This code was generated, courtesy of ChatGPT :) (Modified by me)
         self.position = gameObject.getPosition()
         self.size = gameObject.getSize()
         self.velocity = gameObject.getComponent("RigidBody").getForceDirection()
@@ -97,11 +100,18 @@ class BoxCollider(Component):
         selfBottom = self.position.y + self.size.y / 2
 
         for key, collider in self.sceneColliders.items():
+            if not(collider): continue # None check
+
             if collider == self:
                 continue
 
             otherPosition = collider.getPosition()
             otherSize = collider.getSize()
+
+            if not(otherPosition) or not(otherSize):
+                Logger.log("Something went seriously wrong, continuing to next collider! (PYGE_BOXCOLLIDER_ERROR, PYGE_NON_FATAL_ERROR)", LogType.ERROR, self)
+                Logger.log(f"Error with BoxCollider {collider}", LogType.DESCRIPTION, self)
+                continue
 
             otherLeft = otherPosition.x - otherSize.x / 2
             otherRight = otherPosition.x + otherSize.x / 2
@@ -135,4 +145,5 @@ class BoxCollider(Component):
                     else:
                         sideY = "BOTTOM"
 
-                self.collisionCallback(collider, (sideX, sideY))
+                if self.collisionCallback:
+                    self.collisionCallback(collider, (sideX, sideY))

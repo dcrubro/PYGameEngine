@@ -1,5 +1,6 @@
 import pygame
 
+from Components.BoxCollider import BoxCollider
 from Components.RigidBody import RigidBody
 from GameObject.Objects import *
 from Scripting.Script import Script
@@ -31,17 +32,22 @@ class PipeSpawner(Script):
         topPipeY = gapY - pipeBodHeight
         objTop = Sprite(f"PipeTop{randomId}", self.resLoaderPtr, pygame.Vector2(1350, topPipeY), 0,
                          pygame.Vector2(pipeWidth, pipeBodHeight), "Pipe")
+        objTop.addTag("Pipe")
         objTop.addComponent(AutoKillComp(objTop))
-        objTop.addTag(RigidBody("RigidBody", objTop, 0, 1, isSimulated=False))
-        self.gMHandl.registerGameObject(objTop)
+        objTop.addComponent(RigidBody("RigidBody", objTop, 0, 1, isSimulated=False))
+        objTop.addComponent(BoxCollider("BoxCollider", objTop, 1, 1, None))
+        self.gMHandl.registerGameObject(objTop, start=True)
 
         bottomPipeY = Math.clamp(gapY + gapSize + 60, 420, 32767)
         print(bottomPipeY)
         #bottomPipeY = 404
         objBot = Sprite(f"PipeBot{randomId}", self.resLoaderPtr, pygame.Vector2(1350, bottomPipeY + 50), 0,
                          pygame.Vector2(pipeWidth, pipeBodHeight * 0.9), "Pipe")
+        objTop.addTag("Pipe")
         objBot.addComponent(AutoKillComp(objBot))
-        self.gMHandl.registerGameObject(objBot)
+        objBot.addComponent(RigidBody("RigidBody", objBot, 0, 1, isSimulated=False))
+        objBot.addComponent(BoxCollider("BoxCollider", objBot, -5, 1, None))
+        self.gMHandl.registerGameObject(objBot, start=True)
     def start(self):
         pass
 

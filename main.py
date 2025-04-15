@@ -31,7 +31,9 @@ FPS = 60
 
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screenFlags = pygame.DOUBLEBUF
+screenBpp = 16
+screen = pygame.display.set_mode((1280, 720), screenFlags, screenBpp)
 clock = pygame.time.Clock()
 running = True
 
@@ -62,28 +64,12 @@ gameObjectHandler = GameObjectHandler(pygame.Vector2(1280, 720))
 pmScript = PlayerMovement(object, inputHandler, sound)
 
 object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.1, fpsConstant=FPS))
-object.addComponent(BoxCollider("BoxCollider", object, 6, 3, pmScript.object1CollisionCallback))
+object.addComponent(BoxCollider("BoxCollider", object, 1, 1, pmScript.object1CollisionCallback))
 object.addComponent(pmScript)
 
 gameObjectHandler.registerGameObject(object)
 #physics = Physics.Physics(720)
 #physics.registerObject(object)
-"""
-coinObject: Objects.Sprite = Objects.Sprite("Coin1", resourceLoader, pygame.Vector2(100, 500), 0, pygame.Vector2(50, 50), "coin1")
-coinScript = Coin(coinObject)
-coinObject2: Objects.Sprite = Objects.Sprite("Coin2", resourceLoader, pygame.Vector2(400, 500), 0, pygame.Vector2(50, 50), "coin1")
-coinScript2 = Coin(coinObject2)
-
-coinObject.addComponent(RigidBody("RigidBody", coinObject, 680, 1, bounciness=0, friction=1, fpsConstant=FPS, isSimulated=False))
-coinObject.addComponent(BoxCollider("BoxCollider", coinObject, 10, 10, coinScript.collisionCallback))
-coinObject.addComponent(coinScript)
-coinObject2.addComponent(RigidBody("RigidBody", coinObject2, 680, 1, bounciness=0, friction=1, fpsConstant=FPS, isSimulated=False))
-coinObject2.addComponent(BoxCollider("BoxCollider", coinObject2, 10, 10, coinScript2.collisionCallback))
-coinObject2.addComponent(coinScript2)
-
-gameObjectHandler.registerGameObject(coinObject)
-gameObjectHandler.registerGameObject(coinObject2)
-"""
 
 pipeSpawner: Objects.GameObject = GameObject("PipeSpawner", pygame.Vector2(0, 0), 0, 0)
 pSScript = PipeSpawner(pipeSpawner, gameObjectHandler, resourceLoader)

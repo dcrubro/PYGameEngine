@@ -15,7 +15,7 @@ class GameObjectHandler:
     def setGameObjects(self, v: dict):
         self.__gameObjects = v
 
-    def registerGameObject(self, object: GameObject):
+    def registerGameObject(self, object: GameObject, start = False):
         #deepCopy = copy.deepcopy(object) # Creating a deep copy ensures that creation of objects in loops/scopes is possible.
         # self.__gameObjects[deepCopy.getName()] = deepCopy
         self.__gameObjects[object.getName()] = object
@@ -24,6 +24,10 @@ class GameObjectHandler:
             if isinstance(comp, Script):
                 if hasattr(comp, "load"):
                     comp.load()
+
+        if start:
+            self.startObj(object.getName())
+
 
     def destroyGameObject(self, name):
         obj = self.__gameObjects.get(name)
@@ -45,6 +49,12 @@ class GameObjectHandler:
         # Start logic
         for k, v in self.__gameObjects.items():
             v.start(self.__gameObjects)
+
+    def startObj(self, name):
+        # Start logic
+        obj: GameObject = self.__gameObjects.get(name)
+        if obj:
+            obj.start(self.__gameObjects)
 
     def update(self):
         #Update logic

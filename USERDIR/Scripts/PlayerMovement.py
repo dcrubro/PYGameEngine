@@ -5,6 +5,9 @@ from Enums.LogType import LogType
 from Sound.Sound import Sound
 import pygame
 
+from USERDIR.Scripts.GameManager import GameManager
+
+
 class PlayerMovement(Script):
     def __init__(self, gameObject, inputHandler, soundHandler: Sound):
         super().__init__("PlayerMovement", gameObject)
@@ -19,12 +22,15 @@ class PlayerMovement(Script):
         self.soundHandler: Sound = soundHandler
         self.frames1 = 0
         self.frames2 = 0
+        self.isAlive = True
 
     def object1CollisionCallback(self, collidedWith, side):
         # if (side[0] != "NONE"): print(side[0])
-        if (not(collidedWith.getParentGameObject().hasTag("Coin"))):
-            self.object1CanMove = side
-            self.colTop1 = side[1] == "BOTTOM"
+        if (not(collidedWith.getParentGameObject().hasTag("Coin"))) and self.isAlive:
+            Logger.log("You died!", LogType.INFO, self)
+            self.soundHandler.playSound("death", 0.15)
+            self.isAlive = False
+            GameManager.die()
 
     def start(self):
         self.gameObject.addTag("Player") # Make sure to tag correctly
@@ -32,8 +38,6 @@ class PlayerMovement(Script):
         self.gameObject.getComponent("RigidBody").setG(self.oG)
 
     def update(self):
-        #Logger.log("I'm being called", LogType.INFO, self.gameObject)
-
         # Top collision check
         if (self.colTop1):
             self.gameObject.getComponent("RigidBody").setG(0)
@@ -44,12 +48,11 @@ class PlayerMovement(Script):
         else:
             self.gameObject.getComponent("RigidBody").setG(self.oG)
 
+        # Input section
         if self.frames1 < 10:
             self.frames1 += 1
             return # Skip
 
-        frozenRight = False
-        frozenLeft = False
         if (self.inputHandler.isKeyPressed(pygame.K_w) and self.frames1 % 10 == 0):
             # Play sound
             self.soundHandler.playSound("jump", 0.15)
@@ -57,5 +60,3 @@ class PlayerMovement(Script):
             forceDir.y = -self.jumpPower
             self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
             self.frames1 = 0
-
-        #self.frames1 += 1

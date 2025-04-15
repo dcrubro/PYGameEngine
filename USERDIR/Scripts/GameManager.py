@@ -10,6 +10,7 @@ from GameObjectHandler import GameObjectHandler
 class GameManager(Script):
     _coins = 0
     _scrollSpeed = 2
+    _death = False
     def __init__(self, gameObject):
         super().__init__(f"GameManager{gameObject.getName()}", gameObject)
         self.superSecretScriptIdentifierFlag = True
@@ -65,3 +66,8 @@ class GameManager(Script):
     @classmethod
     def increaseSpeed(cls):
         cls._scrollSpeed += 0.2
+
+    @classmethod
+    def die(cls):
+        cls._death = True
+        cls._scrollSpeed = 0

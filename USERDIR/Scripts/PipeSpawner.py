@@ -7,21 +7,33 @@ from Scripting.Script import Script
 from IO.ResourceLoader import ResourceLoader
 from GameObjectHandler import GameObjectHandler
 import math
+
+from Sound.Sound import Sound
 from USERDIR.Scripts.AutoKillComp import AutoKillComp
 import random
 
+from USERDIR.Scripts.Coin import Coin
+from USERDIR.Scripts.GameManager import GameManager
 from Utils.Math import Math
 
 
 class PipeSpawner(Script):
-    def __init__(self, gameObject, gMHandl, resLoaderPtr):
+    def __init__(self, gameObject, gMHandl, resLoaderPtr, sndHandl):
         super().__init__("PipeSpawner", gameObject)
         self.frames1 = 0
         self.yCoof = 5.76 # 720 / 125 px
         self.gMHandl: GameObjectHandler = gMHandl
         self.resLoaderPtr: ResourceLoader = resLoaderPtr
+        self.sndHandl = sndHandl
+        self.spawnFrameLimit = 200
 
     def spawnSection(self):
+        if not(self.gMHandl.getGameObjectByName("PlayerObj").getComponents()["PlayerMovement"].isAlive):
+            return # Skip, player is dead
+
+        if GameManager.getCoins() % 5 == 0 and GameManager.getCoins() > 0:
+            self.spawnFrameLimit /= 1.1
+
         randomId = random.randint(-32767, 32767)
         pipeWidth = 125
         gapSize = 100
@@ -39,6 +51,16 @@ class PipeSpawner(Script):
         self.gMHandl.registerGameObject(objTop, start=True)
 
         bottomPipeY = Math.clamp(gapY + gapSize + 60, 420, 32767)
+        coinY = (bottomPipeY - 60) - 60 - 180
+        coinObj = Sprite(f"Coin{randomId}", self.resLoaderPtr, pygame.Vector2(1350, coinY), 0, pygame.Vector2(75, 75), "coin1")
+        coinObj.addTag("Coin")
+        coinScr = Coin(coinObj, self.sndHandl)
+        coinObj.addComponent(RigidBody("RigidBody", coinObj, 0, 1, isSimulated=False))
+        coinObj.addComponent(BoxCollider("BoxCollider", coinObj, 1, 1, coinScr.collisionCallback))
+        coinObj.addComponent(coinScr)
+        coinObj.addComponent(AutoKillComp(coinObj))
+        self.gMHandl.registerGameObject(coinObj, start=True)
+
         print(bottomPipeY)
         #bottomPipeY = 404
         objBot = Sprite(f"PipeBot{randomId}", self.resLoaderPtr, pygame.Vector2(1350, bottomPipeY + 50), 0,
@@ -52,7 +74,7 @@ class PipeSpawner(Script):
         pass
 
     def update(self):
-        if self.frames1 < 200:
+        if self.frames1 < self.spawnFrameLimit:
             self.frames1 += 1
             return # Skip
 

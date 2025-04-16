@@ -7,6 +7,8 @@ from Enums.LogType import LogType
 
 """
 BoxCollider needs a RigidBody on the same object to work correctly.
+Also, calling it a "collider" is a little bit misleading. It's actually just a trigger box, and you have to handle
+the actions that take place after a "collision" is detected.
 """
 class BoxCollider(Component):
     def __init__(self, name, gameObject, xTolerance, yTolerance, collisionCallback):
@@ -35,7 +37,6 @@ class BoxCollider(Component):
         self.rotation = gameObject.getRotation()
         self.previousPosition = self.position  # Initialize previous position
 
-        #print(gameObjects.items())
         # Get all colliders in scene
         for k, v in gameObjects.items():
             for k2, v2 in v.getComponents().items():

@@ -9,6 +9,9 @@ class GameObjectHandler:
         self.__gameObjects = gameObjects
         self.__srceenDimensions = srceenDimensions
 
+    def getGameObjectByName(self, name):
+        return self.__gameObjects.get(name)
+
     def getGameObjects(self):
         return self.__gameObjects
 
@@ -27,7 +30,6 @@ class GameObjectHandler:
 
         if start:
             self.startObj(object.getName())
-
 
     def destroyGameObject(self, name):
         obj = self.__gameObjects.get(name)

@@ -28,6 +28,10 @@ class ResourceLoader:
             resource = pygame.mixer.Sound(path)
             self.__resources[name] = resource
             Logger.log(f"Resource at {path} has been loaded as '{name}'.", LogType.INFO, self)
+        elif path.endswith(".ttf"):
+            resource = pygame.font.Font(path)
+            self.__resources[name] = resource
+            Logger.log(f"Resource at {path} has been loaded as '{name}'.", LogType.INFO, self)
         else:
             Logger.log(f"Could not figure out how to load the resource as '{name}' (PYGE_TYPE_UNKNOWN_ERROR, PYGE_NON_FATAL_ERROR).", LogType.ERROR, self)
 
@@ -35,7 +39,7 @@ class ResourceLoader:
         # Recursively load all .png and .jpg files from a specified root directory.
         for root, dirs, files in os.walk(rootDir):
             for file in files:
-                if file.endswith((".png", ".jpg", ".wav")) and not(os.path.splitext(file)[0] in ingoreList):
+                if file.endswith((".png", ".jpg", ".wav", ".ttf")) and not(os.path.splitext(file)[0] in ingoreList):
                     fullPath = os.path.join(root, file) # Get the full path
                     fileName = os.path.splitext(file)[0] # Get the pure name
                     self.loadResource(fileName, fullPath) # Load the image

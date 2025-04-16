@@ -39,24 +39,31 @@ class PlayerMovement(Script):
 
     def update(self):
         # Top collision check
-        if (self.colTop1):
-            self.gameObject.getComponent("RigidBody").setG(0)
-            forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-            if (forceDir.y > 0): forceDir.y = 0
-            self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
-            self.gameObject.getComponent("RigidBody").setIsGrounded(True)
-        else:
-            self.gameObject.getComponent("RigidBody").setG(self.oG)
+        if self.isAlive:
+            if (self.colTop1):
+                self.gameObject.getComponent("RigidBody").setG(0)
+                forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
+                if (forceDir.y > 0): forceDir.y = 0
+                self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
+                self.gameObject.getComponent("RigidBody").setIsGrounded(True)
+            else:
+                self.gameObject.getComponent("RigidBody").setG(self.oG)
 
-        # Input section
-        if self.frames1 < 10:
-            self.frames1 += 1
-            return # Skip
+            if self.gameObject.getComponent("RigidBody").getIsGrounded():
+                Logger.log("You died!", LogType.INFO, self)
+                self.soundHandler.playSound("death", 0.15)
+                self.isAlive = False
+                GameManager.die()
 
-        if (self.inputHandler.isKeyPressed(pygame.K_w) and self.frames1 % 10 == 0):
-            # Play sound
-            self.soundHandler.playSound("jump", 0.15)
-            forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
-            forceDir.y = -self.jumpPower
-            self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
-            self.frames1 = 0
+            # Input section
+            if self.frames1 < 10:
+                self.frames1 += 1
+                return # Skip
+
+            if (self.inputHandler.isKeyPressed(pygame.K_w) and self.frames1 % 10 == 0 and self.gameObject.getPosition().y > 0):
+                # Play sound
+                self.soundHandler.playSound("jump", 0.15)
+                forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()
+                forceDir.y = -self.jumpPower
+                self.gameObject.getComponent("RigidBody").setForce(forceDir, isMassiveY=False)
+                self.frames1 = 0

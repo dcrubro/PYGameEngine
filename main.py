@@ -35,12 +35,12 @@ screenFlags = pygame.DOUBLEBUF
 screenBpp = 16
 screen = pygame.display.set_mode((1280, 720), screenFlags, screenBpp)
 clock = pygame.time.Clock()
+pygame.font.init()
 running = True
 
 # Init the image loader and load some images
 resourceLoader = ResourceLoader()
-resourceLoader.autoLoadResources("USERDIR/Textures/", ("coolasf", "coolasfnobg"))
-resourceLoader.autoLoadResources("USERDIR/SFX/")
+resourceLoader.autoLoadResources("USERDIR/", ("coolasf", "coolasfnobg")) # Pre load all valid "resource" files in the USERDIR directory.
 
 # Init Sound
 sound = Sound(resourceLoader)
@@ -53,7 +53,7 @@ inputHandler = Input(pygame)
 
 # Create a GameManager object for handling game events.
 gameManager = Objects.GameObject = Objects.GameObject("GameObject", pygame.Vector2(0, 0), 0, 0)
-gMScript = GameManager(gameManager)
+gMScript = GameManager(gameManager, resourceLoader, screen)
 gameManager.addComponent(gMScript)
 
 object: Objects.Sprite = Objects.Sprite("PlayerObj", resourceLoader, pygame.Vector2(200, 200), 0, pygame.Vector2(75, 75), "Bird1")
@@ -72,7 +72,7 @@ gameObjectHandler.registerGameObject(object)
 #physics.registerObject(object)
 
 pipeSpawner: Objects.GameObject = GameObject("PipeSpawner", pygame.Vector2(0, 0), 0, 0)
-pSScript = PipeSpawner(pipeSpawner, gameObjectHandler, resourceLoader)
+pSScript = PipeSpawner(pipeSpawner, gameObjectHandler, resourceLoader, sound)
 pipeSpawner.addComponent(pSScript)
 
 gameObjectHandler.registerGameObject(pipeSpawner)

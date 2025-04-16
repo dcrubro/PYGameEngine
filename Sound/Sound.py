@@ -1,38 +1,24 @@
 import pygame
+
+from IO.ResourceLoader import ResourceLoader
 from Logging.Logger import Logger
 from Enums.LogType import LogType
 
 class Sound:
     def __init__(self, resLoaderPtr):
         pygame.mixer.init()
-        # The usage status of the channels (False = Available, True = In Use). The channel count is a limitation of pygame and not PYGameEngine.
-        # Note that Channel 0 is reserved for Music.
-        self.__channelStatus = {
-            1: False,
-            2: False,
-            3: False,
-            4: False,
-            5: False,
-            6: False,
-            7: False
-        }
-        self.__resLoaderPtr = resLoaderPtr
+        self.__resLoaderPtr: ResourceLoader = resLoaderPtr
+        pygame.mixer.set_num_channels(8) # Number of available sound channels. Feel free to change.
 
     def playSound(self, sound, vol):
         # Plays a sound from the ResourceLoader
         # Check for available channels
-        for k, v in self.__channelStatus.items():
-            if not(v):
-                # Channel available
-                channel = pygame.mixer.Channel(k)
-                self.__channelStatus[k] = True
-                res = self.__resLoaderPtr.accessResource(sound, returnIfMissing=False)
-                res.set_volume(vol)
-                if res: # Check resource status
-                    channel.play(res)
-                    self.__channelStatus[k] = False
-                    return
-                self.__channelStatus[k] = False
+        channel = pygame.mixer.find_channel(True)
+        soundRes = self.__resLoaderPtr.accessResource(sound, returnIfMissing=False)
+        if channel and soundRes:
+            channel.set_volume(vol)
+            channel.play(soundRes)
+        else:
             Logger.log(f"Failed to play sound '{sound}'! The resource might not have been found, or no audio channel is available. (PYGE_TYPE_AUDIO_ERROR, PYGE_NON_FATAL_ERROR)", LogType.ERROR, self)
 
     def playMusic(self, filePath, vol, loops: int):

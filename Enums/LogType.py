@@ -5,3 +5,4 @@ class LogType(Enum):
     WARNING = "\033[33m"
     ERROR = "\033[31m"
     DESCRIPTION = '\033[92m'
+    IMPORTANT = "\033[33m"

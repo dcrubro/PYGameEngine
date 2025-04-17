@@ -61,8 +61,6 @@ class PipeSpawner(Script):
         coinObj.addComponent(AutoKillComp(coinObj))
         self.gMHandl.registerGameObject(coinObj, start=True)
 
-        print(bottomPipeY)
-        #bottomPipeY = 404
         objBot = Sprite(f"PipeBot{randomId}", self.resLoaderPtr, pygame.Vector2(1350, bottomPipeY + 50), 0,
                          pygame.Vector2(pipeWidth, pipeBodHeight * 0.9), "Pipe")
         objTop.addTag("Pipe")
@@ -70,8 +68,9 @@ class PipeSpawner(Script):
         objBot.addComponent(RigidBody("RigidBody", objBot, 0, 1, isSimulated=False))
         objBot.addComponent(BoxCollider("BoxCollider", objBot, -5, 1, None))
         self.gMHandl.registerGameObject(objBot, start=True)
+
     def start(self):
-        pass
+        self.spawnFrameLimit = 200 # Reset the spawn speed on start (death case)
 
     def update(self):
         if self.frames1 < self.spawnFrameLimit:

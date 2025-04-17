@@ -2,7 +2,7 @@
 from GameObject.Objects import GameObject
 from USERDIR.Scripts.PipeSpawner import PipeSpawner
 
-VERSION = "a0.5"
+VERSION = "a0.6"
 
 print(f"\033[92mPYGameEngine - Version {VERSION} - Developed by DcruBro @ \033[33mhttps://www.dcrubro.com/\033[00m")
 print(f"\033[92mPYGameEngine\033[00m is licensed under GPLv3.")
@@ -56,10 +56,15 @@ gameManager = Objects.GameObject = Objects.GameObject("GameObject", pygame.Vecto
 gMScript = GameManager(gameManager, resourceLoader, screen)
 gameManager.addComponent(gMScript)
 
+# Simple background
+bgObj = Objects.Sprite("BackgroundObj", resourceLoader, pygame.Vector2(640, 360), 0, pygame.Vector2(1280, 720), "bgUp")
+bgObj.addTag("BG")
+
 object: Objects.Sprite = Objects.Sprite("PlayerObj", resourceLoader, pygame.Vector2(200, 200), 0, pygame.Vector2(75, 75), "Bird1")
 events = pygame.event.get()
 
 gameObjectHandler = GameObjectHandler(pygame.Vector2(1280, 720))
+gameObjectHandler.registerGameObject(bgObj)
 
 pmScript = PlayerMovement(object, inputHandler, sound)
 

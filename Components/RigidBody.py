@@ -22,6 +22,8 @@ class RigidBody(Component):
         self.__bounciness = bounciness
         self.__friction = friction
 
+        self.__frozenAxis = (False, False)
+
         self.__isGrounded = False
 
     def getGravitationalVelocity(self):
@@ -90,6 +92,12 @@ class RigidBody(Component):
     def setFriction(self, v: float):
         self.__friction = v
 
+    def getFrozenAxis(self):
+        return self.__frozenAxis
+
+    def setFrozenAxis(self, v: tuple):
+        self.__frozenAxis = v
+
     # GENERAL FUNCTIONS
     def addForce(self, forceDirection: pygame.Vector2, forceType: ForceType, isMassiveX = True, isMassiveY = True):
         if (self.__mass == 0):
@@ -140,6 +148,10 @@ class RigidBody(Component):
                 self.__isGrounded = False
                 # set vg
                 self.__forceDirection.y += addedGVelocity
+
+            # Account for frozen axis'
+            self.__forceDirection.x = 0 if self.__frozenAxis[0] else self.__forceDirection.x
+            self.__forceDirection.y = 0 if self.__frozenAxis[1] else self.__forceDirection.y
 
             # Apply forces
             self.__gameObject.moveBy(self.__forceDirection)

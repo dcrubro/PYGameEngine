@@ -7,7 +7,6 @@ import pygame
 
 from USERDIR.Scripts.GameManager import GameManager
 
-
 class PlayerMovement(Script):
     def __init__(self, gameObject, inputHandler, soundHandler: Sound):
         super().__init__("PlayerMovement", gameObject)
@@ -31,11 +30,17 @@ class PlayerMovement(Script):
             self.soundHandler.playSound("death", 0.15)
             self.isAlive = False
             GameManager.die()
+            self.gameObject.setTexture("BirdDead")
+            self.gameObject.getComponent("RigidBody").setFrozenAxis((False, True))
 
     def start(self):
+        self.gameObject.setTexture("Bird1")
+        self.isAlive = True
+        self.gameObject.setPosition(pygame.Vector2(200, 200))
         self.gameObject.addTag("Player") # Make sure to tag correctly
         Logger.log("Set gravitational acceleration.", LogType.INFO, self.gameObject)
         self.gameObject.getComponent("RigidBody").setG(self.oG)
+        self.gameObject.getComponent("RigidBody").setFrozenAxis((False, False))
 
     def update(self):
         # Top collision check
@@ -52,6 +57,7 @@ class PlayerMovement(Script):
             if self.gameObject.getComponent("RigidBody").getIsGrounded():
                 Logger.log("You died!", LogType.INFO, self)
                 self.soundHandler.playSound("death", 0.15)
+                self.gameObject.setTexture("BirdDead")
                 self.isAlive = False
                 GameManager.die()
 
@@ -60,7 +66,7 @@ class PlayerMovement(Script):
                 self.frames1 += 1
                 return # Skip
 
-            if (self.inputHandler.isKeyPressed(pygame.K_w) and self.frames1 % 10 == 0 and self.gameObject.getPosition().y > 0):
+            if ((self.inputHandler.isKeyPressed(pygame.K_w) or self.inputHandler.isKeyPressed(pygame.K_SPACE)) and self.frames1 % 10 == 0 and self.gameObject.getPosition().y > 0):
                 # Play sound
                 self.soundHandler.playSound("jump", 0.15)
                 forceDir: pygame.Vector2 = self.gameObject.getComponent("RigidBody").getForceDirection()

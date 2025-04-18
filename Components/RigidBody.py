@@ -7,9 +7,10 @@ from GameObject.Objects import GameObject
 from Logging.Logger import Logger
 
 class RigidBody(Component):
-    def __init__(self, name, gameObject: GameObject, groundY, mass, isSimulated = True, g = 9.81, bounciness = 0, friction = 0.1, fpsConstant = 60):
+    def __init__(self, name, gameObject: GameObject, groundY, mass, isSimulated = True, g = 9.81, bounciness = 0, friction = 0.1, fpsConstant = 60, doAirResistance=False):
         super().__init__(f"{name}{gameObject.getName()}")
         self.__isSimulated = isSimulated # If True, physics will be calculated, otherwise, the object will be static
+        self.__doAirResistance = doAirResistance
         self.__gravitationalVelocity: float = 0
         self.__rotationalForce: pygame.Vector2 = pygame.Vector2(0, 0)
         self.__forceDirection: pygame.Vector2 = pygame.Vector2(0, 0)
@@ -21,6 +22,7 @@ class RigidBody(Component):
         self.__gameObject = gameObject
         self.__bounciness = bounciness
         self.__friction = friction
+        self.__airResistance = friction / 2
 
         self.__frozenAxis = (False, False)
 
@@ -143,6 +145,7 @@ class RigidBody(Component):
                     self.__forceDirection.y *= -self.__bounciness
                 # Apply friction
                 self.__forceDirection.x *= (1 - self.__friction)
+
                 #if (self.__forceDirection.y <= 0.005): self.__forceDirection.y = 0
             else:
                 self.__isGrounded = False
@@ -152,6 +155,10 @@ class RigidBody(Component):
             # Account for frozen axis'
             self.__forceDirection.x = 0 if self.__frozenAxis[0] else self.__forceDirection.x
             self.__forceDirection.y = 0 if self.__frozenAxis[1] else self.__forceDirection.y
+
+            # Air resistance
+            if self.__doAirResistance:
+                self.__forceDirection.x *= (1 - self.__airResistance)
 
             # Apply forces
             self.__gameObject.moveBy(self.__forceDirection)

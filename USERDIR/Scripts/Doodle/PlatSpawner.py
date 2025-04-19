@@ -14,9 +14,9 @@ import random
 
 from USERDIR.Scripts.Coin import Coin
 from USERDIR.Scripts.Doodle.AutoKillCompDoodle import AutoKillCompDoodle
+from USERDIR.Scripts.Doodle.GameManagerDoodle import GameManagerDoodle
 from USERDIR.Scripts.GameManager import GameManager
 from Utils.Math import Math
-
 
 class PlatSpawner(Script):
     def __init__(self, gameObject, gMHandl, resLoaderPtr, sndHandl):
@@ -26,39 +26,46 @@ class PlatSpawner(Script):
         self.resLoaderPtr: ResourceLoader = resLoaderPtr
         self.sndHandl = sndHandl
         self.topLevelY = 100
-        self.platCnt = 5
-        #self.spawned = 0
+        self.platCnt = 7
+        self.maxPlats = 90
 
     def spawnSection(self):
+        if GameManagerDoodle._maxY % 2000 == 0 and self.platCnt > 5:
+            self.platCnt -= 1 # Increase the difficulty every 2000 height gained
+
         if not(self.gMHandl.getGameObjectByName("PlayerObj").getComponents()["PlayerMovement"].isAlive):
             return # Skip, player is dead
 
-
         for i in range(self.platCnt):
+            if GameManagerDoodle._spawned >= self.maxPlats:
+                continue
+
             randomId = random.randint(-32767, 32767)
             randomPosX = random.randint(0, 1280) # Pretty unlikely for 2 to spawn next to each other
-            objTop: Rectangle = Rectangle(f"Platform{randomId}", pygame.Vector2(randomPosX, self.topLevelY - 100), 0,
-                                                                pygame.Vector2(75, 10), "red")
+            objTop: Rectangle = Rectangle(f"Platform{randomId}", pygame.Vector2(randomPosX, random.randint(self.topLevelY - 500, self.topLevelY - 100)), 0, pygame.Vector2(75, 10), "#300000")
             objTop.addTag("Platform")
             objTop.addComponent(AutoKillCompDoodle(objTop, self.gMHandl))
             objTop.addComponent(RigidBody("RigidBody", objTop, 0, 1, isSimulated=False))
             objTop.addComponent(BoxCollider("BoxCollider", objTop, 1, 1, None))
             self.gMHandl.registerGameObject(objTop, start=True)
-            #self.spawned += 1
-            #print(self.spawned)
+            GameManagerDoodle._spawned += 1
 
         self.topLevelY -= 100
 
     def start(self):
-        self.spawnFrameLimit = 200 # Reset the spawn speed on start (death case)
+        # Reset the counters
+        self.platCnt = 10
+        self.topLevelY = 100
 
     def update(self):
-        diff = abs(self.gMHandl.getGameObjectByName("PlayerObj").getPosition().y - self.topLevelY)
-        print(diff)
-        if diff < 450:
-            print("Spawned")
-            # Spawn platform level, player is getting close
-            self.spawnSection()
+        # ChatGPT helped with this logic.
+        platformProgress = -self.topLevelY  # upward distance of highest spawned platform
+        maxClimb = GameManagerDoodle._maxY
 
-        self.frames1 = 0
-        #self.spawnSection()
+        if platformProgress < maxClimb + 650 and self.frames1 % 80 == 0:
+            #print(f"Total platforms: {len(self.gMHandl.getObjectsByTag('Platform'))}")
+            #print(f"Spawning section: platformProgress={platformProgress}, maxClimb={maxClimb}")
+            self.spawnSection()
+            self.frames1 = 0
+
+        self.frames1 += 1 # Limit spawn speed to every 80 frames to help avoid lag

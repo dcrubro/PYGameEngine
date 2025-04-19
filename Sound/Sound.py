@@ -10,10 +10,10 @@ class Sound:
         self.__resLoaderPtr: ResourceLoader = resLoaderPtr
         pygame.mixer.set_num_channels(8) # Number of available sound channels. Feel free to change.
 
-    def playSound(self, sound, vol):
+    def playSound(self, sound, vol, override=False):
         # Plays a sound from the ResourceLoader
         # Check for available channels
-        channel = pygame.mixer.find_channel(True)
+        channel = pygame.mixer.find_channel(not(override))
         soundRes = self.__resLoaderPtr.accessResource(sound, returnIfMissing=False)
         if channel and soundRes:
             channel.set_volume(vol)

@@ -6,6 +6,7 @@ from Enums.LogType import LogType
 from Sound.Sound import Sound
 import pygame
 
+from USERDIR.Scripts.Doodle.GameManagerDoodle import GameManagerDoodle
 from USERDIR.Scripts.GameManager import GameManager
 
 class PlayerMovementDoodle(Script):
@@ -25,12 +26,13 @@ class PlayerMovementDoodle(Script):
         self.isAlive = True
 
     def addZeForceee(self):
-        self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(self.gameObject.getComponent("RigidBody").getForceDirection().x, -15), ForceType.INSTANT)
+        self.soundHandler.playSound("jumpdoodle", 0.15, True)
+        self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(self.gameObject.getComponent("RigidBody").getForceDirection().x, -14), ForceType.INSTANT)
 
     def object1CollisionCallback(self, collidedWith, side):
         #print(side)
         # if (side[0] != "NONE"): print(side[0])
-        if side[1] == "BOTTOM" or self.gameObject.getComponent("RigidBody").getIsGrounded():
+        if (side[1] == "BOTTOM" or self.gameObject.getComponent("RigidBody").getIsGrounded()) and self.isAlive:
             self.addZeForceee()
         #elif (not(collidedWith.getParentGameObject().hasTag("Platform"))) and self.isAlive:
         #    Logger.log("You died!", LogType.INFO, self)
@@ -41,9 +43,9 @@ class PlayerMovementDoodle(Script):
             #self.gameObject.getComponent("RigidBody").setFrozenAxis((False, True))
 
     def start(self):
-        self.gameObject.setTexture("DoodleChar")
+        self.gameObject.setTexture("Doodle")
         self.isAlive = True
-        self.gameObject.setPosition(pygame.Vector2(200, 200))
+        self.gameObject.setPosition(pygame.Vector2(200, 100))
         self.gameObject.addTag("Player") # Make sure to tag correctly
         Logger.log("Set gravitational acceleration.", LogType.INFO, self.gameObject)
         self.gameObject.getComponent("RigidBody").setG(self.oG)
@@ -61,12 +63,13 @@ class PlayerMovementDoodle(Script):
             #else:
             #    self.gameObject.getComponent("RigidBody").setG(self.oG)
 
-            if self.gameObject.getComponent("RigidBody").getIsGrounded() and False:
+            if self.gameObject.getComponent("RigidBody").getIsGrounded():
                 Logger.log("You died!", LogType.INFO, self)
+                self.gameObject.getComponent("RigidBody").setFrozenAxis((False, True))
                 self.soundHandler.playSound("death", 0.15)
                 self.gameObject.setTexture("BirdDead")
                 self.isAlive = False
-                GameManager.die()
+                GameManagerDoodle.die()
 
             # Input section
             #if self.frames1 < 10:
@@ -82,6 +85,6 @@ class PlayerMovementDoodle(Script):
             #    self.frames1 = 0
 
             if self.inputHandler.isKeyPressed(pygame.K_d):
-                self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(4, self.gameObject.getComponent("RigidBody").getForceDirection().y), ForceType.INSTANT)
+                self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(6, self.gameObject.getComponent("RigidBody").getForceDirection().y), ForceType.INSTANT)
             if self.inputHandler.isKeyPressed(pygame.K_a):
-                self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(-4, self.gameObject.getComponent("RigidBody").getForceDirection().y), ForceType.INSTANT)
+                self.gameObject.getComponent("RigidBody").setForce(pygame.Vector2(-6, self.gameObject.getComponent("RigidBody").getForceDirection().y), ForceType.INSTANT)

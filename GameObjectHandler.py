@@ -2,6 +2,7 @@ import pygame
 import copy
 
 from GameObject.Objects import GameObject
+from IO.Time import Time
 from Scripting.Script import Script
 
 class GameObjectHandler:
@@ -32,20 +33,28 @@ class GameObjectHandler:
             self.startObj(object.getName())
 
     def destroyGameObject(self, name):
-        obj = self.__gameObjects.get(name)
+        obj: GameObject = self.__gameObjects.get(name)
         if obj:
             for comp in obj.getComponents().values():
                 if isinstance(comp, Script):
                     if hasattr(comp, "unload"):
                         comp.unload()
                 del comp # Clean up
+            obj.getComponents().clear()
             #a = len(self.__gameObjects)
             del self.__gameObjects[name]
-            #if (a != len(self.__gameObjects)): print("yuh")
+            #print("destroyed")
 
     def getObjectByTag(self, tag):
         for k, v in self.__gameObjects.items():
             if v.hasTag(tag): return v
+
+    def getObjectsByTag(self, tag):
+        objs = list()
+        for k, v in self.__gameObjects.items():
+            if v.hasTag(tag): objs.append(v)
+
+        return tuple(objs)
 
     def start(self):
         # Start logic
@@ -77,7 +86,18 @@ class GameObjectHandler:
                 self.destroyGameObject(k)
                 continue
             v.update(self.__gameObjects)
-            if (v.getPosition().x >= (centerPos.x - (self.__srceenDimensions.x // 2) * toleranceMultiplier) and v.getPosition().x <= (centerPos.x + (self.__srceenDimensions.x // 2) * toleranceMultiplier)):
+
+            # This is some code that ChatGPT wrote. It is basically an improved version of the previous "Don't render objects out of camera" system,
+            # but this time, it also checks the Y axis
+            screenHalfW = (self.__srceenDimensions.x // 2) * toleranceMultiplier
+            screenHalfH = (self.__srceenDimensions.y // 2) * toleranceMultiplier
+            vx, vy = v.getPosition().x, v.getPosition().y
+
+            if (
+                    vx >= (centerPos.x - screenHalfW) and vx <= (centerPos.x + screenHalfW) and
+                    vy >= (centerPos.y - screenHalfH) and vy <= (centerPos.y + screenHalfH)
+            ):
+                v.lastRenderTime = Time.getTime()
                 v.draw(pygameInstance, screenInstance, v.getRotation())
 
     def drawThenUpdate(self, pygameInstance: pygame, screenInstance, centerPos: pygame.Vector2):

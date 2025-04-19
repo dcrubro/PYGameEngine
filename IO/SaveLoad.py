@@ -2,8 +2,6 @@ import json
 import zlib
 import base64
 
-from lxml.objectify import pyannotate
-
 from GameObject.Objects import *
 from Components.RigidBody import RigidBody
 from Components.BoxCollider import BoxCollider
@@ -14,7 +12,8 @@ class SaveLoad:
     def __init__(self):
         pass
 
-    def serializeGameObject(self, obj: GameObject):
+    @staticmethod
+    def serializeGameObject(obj: GameObject):
         data = {}
 
         # These exist no matter what
@@ -77,7 +76,8 @@ class SaveLoad:
 
         return data
 
-    def deserializeGameObject(self, data):
+    @staticmethod
+    def deserializeGameObject(data):
         # Normally, you'd pass a pointer to the object you want to save this to, but this is Python and we sadly can't do that :(
         object = None
         match data["specificType"]:
@@ -110,7 +110,25 @@ class SaveLoad:
                                 None)
         pass
 
-    def saveData(self, path, data):
+    @staticmethod
+    def saveValue(name, value):
+        data = SaveLoad.loadData("USERDIR/Saves/valstore.bin")
+        if data is None:
+            data = dict()
+
+        data[name] = value
+        SaveLoad.saveData("USERDIR/Saves/valstore.bin", data)
+        return True
+
+    @staticmethod
+    def getValue(name):
+        data = SaveLoad.loadData("USERDIR/Saves/valstore.bin")
+        if data:
+            return data.get(name)
+        return None
+
+    @staticmethod
+    def saveData(path, data):
         with open(path, "wb") as file:
             json_str = json.dumps(data)
             compressed = zlib.compress(json_str.encode('utf-8'))
@@ -119,11 +137,17 @@ class SaveLoad:
             file.close()
             #Logger.log("Saved data")
 
-    def loadData(self, path, data):
-        with open(path, "rb") as file:
-            encoded = file.read()
-            compressed = base64.b64decode(encoded)
-            json_str = zlib.decompress(compressed).decode('utf-8')
-            data = json.loads(json_str)
-            file.close()
-            return json.loads(data)
+    @staticmethod
+    def loadData(path):
+        try:
+            with open(path, "rb") as file:
+                encoded = file.read()
+                compressed = base64.b64decode(encoded)
+                json_str = zlib.decompress(compressed).decode('utf-8')
+                data = json.loads(json_str)
+                file.close()
+                return data
+            return None
+        except FileNotFoundError:
+            Logger.log(f"Couldn't find the file '{path}'. (PYGE_FILE_NOT_FOUND_ERROR, PYGE_NON_FATAL_ERROR)", LogType.ERROR, "SaveLoad")
+            return None

@@ -1,15 +1,17 @@
 # PYGameEngine - Basic python game engine / physics engine based on pygame.
 from Enums.LogType import LogType
 from GameObject.Objects import GameObject
+from IO.Time import Time
 from Logging.Logger import Logger
+from USERDIR.Scripts.Doodle.AutoKillCompDoodle import AutoKillCompDoodle
 from USERDIR.Scripts.Doodle.GameManagerDoodle import GameManagerDoodle
 from USERDIR.Scripts.Doodle.PlatSpawner import PlatSpawner
 from USERDIR.Scripts.Doodle.PlayerMovementDoodle import PlayerMovementDoodle
 from USERDIR.Scripts.PipeSpawner import PipeSpawner
 
-VERSION = "a0.6"
+VERSION = "a0.7"
 
-print(f"\033[92mPYGameEngine - Version {VERSION} - Developed by DcruBro @ \033[33mhttps://www.dcrubro.com/\033[00m")
+print(f"\033[92mPYGameEngine (PYGE) - Version {VERSION} - Developed by DcruBro @ \033[33mhttps://www.dcrubro.com/\033[00m")
 print(f"\033[92mPYGameEngine\033[00m is licensed under GPLv3.")
 print(f"\033[92mPYGameEngine\033[00m uses the following software: \033[92mpython (and its libraries), pygame (and its libraries), SDL (and its libraries), renderpyg (and its libraries) \033[31m- These are licensed under their own licenses.\033[00m\n")
 
@@ -24,16 +26,12 @@ from Components.RigidBody import RigidBody
 from GameObjectHandler import GameObjectHandler
 from Input.Input import Input
 from Sound.Sound import Sound
-#from GUI.GUI import GUI
-#from imgui.integrations.pygame import PygameRenderer
-from Utils.Math import Math
 from IO.SaveLoad import SaveLoad
 from USERDIR.Scripts.PlayerMovement import PlayerMovement
-from USERDIR.Scripts.Coin import Coin
 from USERDIR.Scripts.GameManager import GameManager
 
-FPS = 60
-DEMO = "DOODLE" # FLAPPY or DOODLE
+FPS = 60 # It seems that the engine can handle lower FPS fine. Of course component updates will be slower meaning that it does negatively impact gameplay if the FPS drops below ~50 FPS
+DEMO = "FLAPPY" # FLAPPY or DOODLE
 
 # pygame setup
 pygame.init()
@@ -56,6 +54,9 @@ saveLoad = SaveLoad()
 
 # Init the Input Handler
 inputHandler = Input(pygame)
+
+# Init Time
+time = Time()
 
 if DEMO == "FLAPPY":
     # Create a GameManager object for handling game events.
@@ -96,8 +97,6 @@ if DEMO == "FLAPPY":
     gameObjectHandler.start()
     gameManager.getComponent("GameManager").start(gameObjectHandler)
 
-    #saveLoad.saveData("USERDIR/Saves/object.bin", saveLoad.serializeGameObject(object))
-
     while running:
         pygame.display.set_caption(f'PYGameEngine - FPS: {round(clock.get_fps(), 2)}')
 
@@ -113,6 +112,7 @@ if DEMO == "FLAPPY":
         gameManager.getComponent("GameManager").update(pygame.Vector2(1280, 720), gameObjectHandler)
         gameObjectHandler.updateThenDraw(pygame, screen, object.getPosition(), 2)
         gameManager.getComponent("GameManager").lateUpdate(gameObjectHandler)
+        time.increment()
 
         # flip() the display to put your work on screen
         pygame.display.flip()
@@ -122,30 +122,31 @@ if DEMO == "FLAPPY":
 elif DEMO == "DOODLE":
     # Create a GameManager object for handling game events.
     gameManager = Objects.GameObject = Objects.GameObject("GameManager", pygame.Vector2(0, 0), 0, 0)
+    gameManager.addTag("GameManager")
     gMScript = GameManagerDoodle(gameManager, resourceLoader, screen)
     gameManager.addComponent(gMScript)
 
     # Simple background
-    #bgObj = Objects.Sprite("BackgroundObj", resourceLoader, pygame.Vector2(640, 360), 0, pygame.Vector2(1280, 720),
-    #                       "bgUp")
-    #bgObj.addTag("BG")
+    bgObj = Objects.Sprite("BackgroundObj", resourceLoader, pygame.Vector2(640, 360), 0, pygame.Vector2(1280, 720),
+                           "bgUp")
+    bgObj.addTag("BG")
 
-    object: Objects.Sprite = Objects.Sprite("PlayerObj", resourceLoader, pygame.Vector2(200, 200), 0,
+    object: Objects.Sprite = Objects.Sprite("PlayerObj", resourceLoader, pygame.Vector2(200, 100), 0,
                                             pygame.Vector2(75, 75), "DoodleChar")
 
-    platformTest: Objects.Rectangle = Objects.Rectangle("PlatformTest", pygame.Vector2(200, 200), 0,
-                                            pygame.Vector2(75, 10), "red")
+    platformTest: Objects.Rectangle = Objects.Rectangle("PlatformTest", pygame.Vector2(200, 100), 0,
+                                            pygame.Vector2(75, 10), "#300000")
     platformTest.addComponent(RigidBody("RigidBody", platformTest, 720, 1, bounciness=0, friction=0.1, fpsConstant=FPS, isSimulated=False))
     platformTest.addComponent(BoxCollider("BoxCollider", platformTest, 1, 21, None))
 
     events = pygame.event.get()
 
     gameObjectHandler = GameObjectHandler(pygame.Vector2(1280, 720))
-    #gameObjectHandler.registerGameObject(bgObj)
-
+    gameObjectHandler.registerGameObject(bgObj)
+    platformTest.addComponent(AutoKillCompDoodle(platformTest, gameObjectHandler))
     pmScript = PlayerMovementDoodle(object, inputHandler, sound)
 
-    object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.1, fpsConstant=FPS, doAirResistance=True))
+    object.addComponent(RigidBody("RigidBody", object, 720, 1, bounciness=0, friction=0.1, fpsConstant=FPS, doAirResistance=True, isSimulated=True))
     object.addComponent(BoxCollider("BoxCollider", object, 1, 6, pmScript.object1CollisionCallback))
     object.addComponent(pmScript)
 
@@ -180,8 +181,9 @@ elif DEMO == "DOODLE":
 
         # RENDER YOUR GAME HERE
         gameManager.getComponent("GameManager").update(pygame.Vector2(1280, 720), gameObjectHandler)
-        gameObjectHandler.updateThenDraw(pygame, screen, object.getPosition(), 2)
+        gameObjectHandler.updateThenDraw(pygame, screen, object.getPosition(), 10)
         gameManager.getComponent("GameManager").lateUpdate(gameObjectHandler)
+        time.increment()
 
         # flip() the display to put your work on screen
         pygame.display.flip()

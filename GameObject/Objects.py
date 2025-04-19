@@ -1,6 +1,7 @@
 import pygame
 import Components.Component
 from Enums.LogType import LogType
+from IO.Time import Time
 from Scripting.Script import Script
 from IO.ResourceLoader import ResourceLoader
 from Logging.Logger import Logger
@@ -15,6 +16,7 @@ class GameObject:
         if components == None:
             components = dict()
         self.__components = components
+        self.lastRenderTime = 0
 
     def moveBy(self, v: pygame.Vector2):
         self.__position += v
@@ -94,6 +96,9 @@ class GameObject:
 
     def update(self, gameObjects):
         #Runs every frame
+        if getattr(self, "markedForDestruction", False):
+            return  # Already flagged for death
+
         for k, v in self.__components.items():
             if isinstance(v, Script):
                 if hasattr(v, "update"):
@@ -150,7 +155,7 @@ class Rectangle(GameObject):
 
         # Finally, blit the rotated surface to the screen at the new position
         screenInstance.blit(rotated_surface, self.__rect.topleft)
-        pygameInstance.draw.rect(screenInstance, "green", pygame.Rect(self.getPosition().x, self.getPosition().y, 1, 1))
+        #pygameInstance.draw.rect(screenInstance, "green", pygame.Rect(self.getPosition().x, self.getPosition().y, 1, 1))
 
 class Circle(GameObject):
     def __init__(self, name, position, rotation, radius, color):
@@ -181,9 +186,6 @@ class Sprite(GameObject):
         self.__size = size
         self.__texture = texture
 
-    #def changeColor(self, color):
-    #    self.color = color
-
     def setSize(self, size: pygame.Vector2):
         self.__size = size
 
@@ -198,6 +200,7 @@ class Sprite(GameObject):
 
     # Override
     def draw(self, pygameInstance, screenInstance, rotation):
+        # This is a modified example from the pygame wiki
         image = self.__resLoaderPtr.accessResource(self.__texture if self.__texture else "missing_texture")
         image = pygame.transform.scale(image, self.getSize())
 

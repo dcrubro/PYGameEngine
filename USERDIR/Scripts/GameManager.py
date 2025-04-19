@@ -1,5 +1,6 @@
 from GameObject.Objects import GameObject
 from IO.ResourceLoader import ResourceLoader
+from IO.SaveLoad import SaveLoad
 from Scripting.Script import Script
 from Input.Input import Input
 from Logging.Logger import Logger
@@ -10,10 +11,13 @@ import os
 
 # GameManager is a special type of script, which should be used for general tracking/event handling in your games.
 # Only one of these should exist per game.
+# IMPORTANT NOTE: THIS SCRIPT SHOULD NEVER BE ON A GAMEOBJECT THAT'S REGISTERED IN THE GAMEOBJECTHANDLER!
+# This implementation is also rushed and not superb. Methods should be implemented as classmethods or staticmethods
 class GameManager(Script):
     _coins = 0
     _scrollSpeed = 2
     _death = False
+    _hS = 0
     def __init__(self, gameObject, resLoaderPtr, screenPtr):
         super().__init__(f"GameManager{gameObject.getName()}", gameObject)
         self.superSecretScriptIdentifierFlag = True
@@ -60,8 +64,10 @@ class GameManager(Script):
         if not(player.getComponents()["PlayerMovement"].isAlive):
             text2 = font.render("YOU DIED", True, "red")
             text3 = font.render("(Press 'R' to restart)", True, "red")
-            self.screenPtr.blit(text2, (570, 300))
-            self.screenPtr.blit(text3, (500, 360))
+            text4 = font.render(f"Highscore: {int(GameManager._hS)}", True, "blue")
+            self.screenPtr.blit(text2, (570, 290))
+            self.screenPtr.blit(text3, (500, 350))
+            self.screenPtr.blit(text4, (520, 410))
 
         self.screenPtr.blit(text, (0, 0))
 
@@ -83,6 +89,14 @@ class GameManager(Script):
 
     @classmethod
     def die(cls):
+        highScore = SaveLoad.getValue("flappyHighScore")
+        if highScore is None:
+            highScore = 0
+
+        highScore = max(cls._coins, highScore)
+        SaveLoad.saveValue("flappyHighScore", highScore)
+        cls._hS = highScore
+
         cls._death = True
         cls._scrollSpeed = 0
 
